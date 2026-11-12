@@ -1,0 +1,477 @@
+schema_version: 1
+project: null
+context_type: brownfield
+upstream:
+  ideation:
+    path: context/foundation/ideation.yaml
+    schema_version: 1
+  discovery:
+    path: context/foundation/discovery.yaml
+    schema_version: 2
+direction:
+  problem: Family media is spread across cloud accounts and divergent older drives,
+    while storage pressure and manual management recur.
+  primary_actor: Family archive operator
+  chosen_approach: Establish a local archive workflow, beginning with one verified
+    archive copy.
+  rationale: The user selected a straightforward end-to-end local archive as the first
+    step.
+  target_outcome: Preserve and organize family media in a usable verified local archive
+    through a repeatable workflow.
+discovery_review:
+- id: REV-001
+  discovery_refs:
+  - F-001
+  - U-001
+  - U-002
+  disposition: noted
+  explanation: Two divergent drives contain potentially unique older media; safe reconciliation
+    and recoverable copies remain unproven.
+- id: REV-002
+  discovery_refs:
+  - F-009
+  - F-016
+  - F-035
+  - F-036
+  - U-007
+  disposition: noted
+  explanation: Cloud cleanup feasibility and reliable identification remain unproven,
+    especially for media without item references; the user accepts this risk while
+    retaining cleanup in scope.
+- id: REV-003
+  discovery_refs:
+  - F-020
+  - F-021
+  - F-022
+  - F-033
+  - U-006
+  disposition: noted
+  explanation: One device-side removal was demonstrated, but complete reliable family
+    intake and cloud quota relief are not demonstrated.
+- id: REV-004
+  discovery_refs:
+  - ALT-008
+  - ALT-009
+  disposition: noted
+  explanation: Conditional local archiving may reduce storage pressure; paid cloud
+    retention is simpler for capture but retains subscription and export burden. Neither
+    direction is approved by this review.
+- id: REV-005
+  discovery_refs:
+  - F-012
+  - F-018
+  - F-007
+  disposition: noted
+  explanation: User rejected BeeStation on cost and bundled hardware and rejected
+    lossy storage conversion; usability for nontechnical relatives matters.
+decisions:
+- id: D-001
+  topic: Product direction
+  decision: Start with a local archive workflow and one verified archive copy.
+  rationale: User selected a straightforward end-to-end first step.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - U-002
+- id: D-002
+  topic: Cleanup eligibility and missing items
+  decision: After archive integration and hash verification, proceed with cleanup.
+    A missing Google Photos link is expected for some items; warn the user if the
+    corresponding phone file cannot be found.
+  rationale: The user considers archived media safe for cleanup and expects some links
+    to be absent.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - F-033
+  - F-036
+  - U-007
+- id: D-003
+  topic: Batch outcome report
+  decision: Retain a single text report with a timestamped filename for the batch
+    outcome.
+  rationale: User selected a simple report.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+- id: D-004
+  topic: Ambiguous phone cleanup
+  decision: Leave ambiguous phone matches untouched and report ambiguous matches or
+    failed deletions to the user for guidance.
+  rationale: Timestamp-based filenames reduce but do not eliminate ambiguity.
+  confirmed_by_user: true
+  discovery_refs:
+  - F-033
+  - U-007
+- id: D-005
+  topic: Recovery and resumption
+  decision: When processing encounters a problem, allow a user decision or manual
+    fix, then resume the process.
+  rationale: User wants to correct issues and continue the batch.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - U-002
+- id: D-006
+  topic: Operating model
+  decision: The workflow is operated by a single user on one computer.
+  rationale: User specified the operating model.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+- id: D-007
+  topic: Google Photos session
+  decision: Use Google sign-in for the Google Photos session.
+  rationale: The user wants to use the sign-in needed for the session.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - F-034
+- id: D-008
+  topic: Local application access
+  decision: Access to the computer is sufficient; no separate local application sign-in
+    is required.
+  rationale: User confirmed the single-user access model.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+- id: D-009
+  topic: Persistent media catalog
+  decision: Maintain a lightweight local file-based catalog that persists beyond batch
+    cleanup and supports identification, duplicate detection and future metadata and
+    tag searching.
+  rationale: User confirmed the catalog and its intended uses.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - U-002
+- id: D-010
+  topic: Cloud cleanup and recovery
+  decision: Retain cloud cleanup, accept its feasibility and reliability risk, and
+    preserve verified archive results when cleanup is unresolved.
+  rationale: User confirmed the intended outcome and accepted the risk.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - F-034
+  - F-036
+  - U-007
+- id: D-011
+  topic: Batch reports
+  decision: Store a timestamp-named text report for each batch in C:\tmp and retain
+    it after temporary batch data is removed.
+  rationale: User specified the report location and retention.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+- id: D-012
+  topic: Repeatability and recovery
+  decision: Repeated or resumed processing must preserve results and avoid duplicate
+    archived media, repeated confirmed destructive operations, and corruption.
+  rationale: User confirmed idempotency and recovery outcomes.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - U-002
+- id: D-013
+  topic: Archive organization
+  decision: Organize archived media in folders by year.
+  rationale: User confirmed the original outcome of browsing media by year.
+  confirmed_by_user: true
+  discovery_refs:
+  - ALT-008
+  - U-002
+scope:
+  first_valuable_flow:
+  - Extract a Takeout export into the staging location, retaining its folder hierarchy
+    as the batch input.
+  - Prepare each media item in the batch location, retaining available metadata or
+    recording unknowns, the intended archive location and relevant processing timestamps.
+  - Integrate each item into one local archive, detect duplicates, verify content
+    and retain its catalog information.
+  - After all batch media are integrated and verified, remove corresponding items
+    from the connected phone; confirm outcomes, warn about missing items, and leave
+    ambiguous matches untouched for user guidance.
+  - Attempt cleanup of eligible Google Photos items with available references; record
+    missing references and unsuccessful outcomes, and allow unresolved operations
+    to be retried.
+  - Pause for user decisions or manual fixes as needed and resume without losing completed
+    work; retain verified archive results independently of cleanup outcomes.
+  - Once processing is complete, clean temporary staging and batch data and retain
+    a timestamp-named text report in C:\tmp.
+  in_scope:
+  - Takeout staging and batch preparation; one verified local archive; persistent
+    media catalog; phone and Google Photos cleanup; recovery and resumption; and a
+    retained batch report.
+  - Year-based archive folders for browsing media.
+  later:
+  - A second archive copy and synchronization.
+  - A search interface for the catalog.
+success_criteria:
+  primary:
+  - A Takeout batch can be integrated into a verified local archive and proceed through
+    phone and available-link cloud cleanup, with outcomes reported.
+  - Archived media can be browsed in folders organized by year.
+  secondary:
+  - Reduce repeated manual handling of batches.
+  guardrails:
+  - Preserve source media until archive integration and hash verification succeed.
+  - Do not remove ambiguous phone matches; warn and request user guidance.
+  - Repeated or resumed processing does not duplicate archived media, lose completed
+    results, repeat confirmed destructive operations, or corrupt archive contents
+    or metadata.
+  - Uncertain operations remain recoverable without assuming their outcome.
+requirements:
+- id: FR-001
+  actor: Family archive operator
+  capability: Extract a Takeout batch into staging, preserving its folder structure.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-001
+- id: FR-002
+  actor: Family archive operator
+  capability: Prepare batch media with available metadata or explicit unknowns, intended
+    archive location and processing timestamps for each item.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-001
+- id: FR-003
+  actor: Family archive operator
+  capability: Identify duplicates, integrate media into one local archive and verify
+    archived content before source cleanup.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-001
+  - D-002
+- id: FR-004
+  actor: Family archive operator
+  capability: After batch media are archived and verified, remove corresponding media
+    from the connected phone, confirm outcomes and warn when a file is missing.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-002
+- id: FR-005
+  actor: Family archive operator
+  capability: Leave ambiguous phone matches untouched and report ambiguity or failed
+    removals for guidance.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-004
+- id: FR-006
+  actor: Family archive operator
+  capability: Attempt removal of eligible Google Photos items, handle missing item
+    references, report unsuccessful operations and allow unresolved operations to
+    be retried without losing verified archive results.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-002
+  - D-010
+- id: FR-007
+  actor: Family archive operator
+  capability: After processing, remove temporary staging and batch data and retain
+    a timestamp-named text report in C:\tmp summarizing processing outcomes, cleanup
+    results, warnings and unresolved issues.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-003
+  - D-011
+- id: FR-008
+  actor: Family archive operator
+  capability: Preserve completed processing results and enable the user to resolve
+    problems and resume an interrupted or uncertain batch without restarting it.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-005
+  - D-012
+- id: FR-009
+  actor: Family archive operator
+  capability: Sign in to Google Photos to authorize the cloud cleanup session.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-007
+- id: FR-010
+  actor: Family archive operator
+  capability: Maintain a persistent catalog of archived photos and videos that survives
+    restarts and batch cleanup, retains available original metadata and supports media
+    identification and duplicate detection.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-009
+- id: FR-011
+  actor: Family archive operator
+  capability: Retain each cataloged item’s location, filename, media type, timestamps,
+    dimensions, video duration, frames per second, file size and SHA256, recording
+    unavailable information as unknown.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-009
+- id: FR-012
+  actor: Family archive operator
+  capability: Associate arbitrary searchable tags with media, including people, places,
+    events and subjects, and retain metadata and tags needed for future searching
+    and filtering.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-009
+- id: FR-013
+  actor: Family archive operator
+  capability: Ensure repeated execution and resumption do not create duplicate archived
+    media, lose completed results, repeat confirmed destructive operations, or corrupt
+    archive contents or metadata; recover uncertain operations without assuming success
+    or failure.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-012
+- id: FR-014
+  actor: Family archive operator
+  capability: Organize archived photos and videos in folders by year for browsing.
+  priority: must_have
+  change: new
+  decision_ids:
+  - D-013
+user_stories:
+- id: US-01
+  title: Archive and clean a Takeout batch
+  given: A Takeout export and a connected phone are available
+  when: The user processes the batch
+  then: Media is integrated and hash verified before eligible cleanup, and a timestamped
+    report records outcomes.
+  acceptance_criteria:
+  - Each media item is archived and its content verified before it becomes eligible
+    for source cleanup.
+  - Missing phone files produce warnings; ambiguous phone matches remain untouched
+    and are reported for guidance.
+  - Eligible cloud items are attempted when references are available; missing references
+    and unsuccessful operations are reported and unresolved operations can be retried.
+  - Verified archive results remain available regardless of cleanup outcomes.
+  - The timestamp-named text report in C:\tmp remains after temporary batch data is
+    removed.
+  - Problems can be resolved by a user decision or manual fix and processing can resume
+    without restarting the entire batch.
+  - Archived media is organized in folders by year for browsing.
+  requirement_ids:
+  - FR-001
+  - FR-002
+  - FR-003
+  - FR-004
+  - FR-005
+  - FR-006
+  - FR-007
+  - FR-008
+  - FR-009
+  - FR-010
+  - FR-011
+  - FR-012
+  - FR-013
+  - FR-014
+- id: US-02
+  title: Retain catalog and resume safely
+  given: A batch includes archived media and processing may be interrupted
+  when: The user restarts or resumes processing, including a repeated execution
+  then: Completed results and catalog information remain available without duplicate
+    archived media or repeated confirmed destructive operations.
+  acceptance_criteria:
+  - The catalog survives application restarts and removal of temporary batch data,
+    retaining available original metadata, specified media attributes and tags.
+  - Repeated or resumed processing does not corrupt archived media or metadata.
+  - An interrupted or uncertain operation is recoverable without assuming it succeeded
+    or failed.
+  requirement_ids:
+  - FR-008
+  - FR-010
+  - FR-011
+  - FR-012
+  - FR-013
+business_rules:
+- An item becomes eligible for source cleanup after archive integration and successful
+  content verification.
+- Ambiguous phone matches remain untouched until the user provides guidance.
+- Verified archive results remain available independently of cleanup outcomes.
+non_functional_requirements:
+- id: NFR-001
+  property: The media catalog is lightweight, local and file-based.
+  acceptance_target: Catalog is stored locally in files.
+- id: NFR-002
+  property: Catalog persistence
+  acceptance_target: Catalog survives application restarts and temporary batch cleanup.
+- id: NFR-003
+  property: Safe repeatability and recovery
+  acceptance_target: Repeated or resumed execution preserves completed results, avoids
+    duplicate archive media and repeated confirmed destructive operations, and does
+    not corrupt archive contents or metadata.
+access_control:
+  model: Single user on one computer, with no separate local application sign-in;
+    Google sign-in is used for the Photos session.
+  capabilities:
+  - Operate and resume batches.
+  - Sign in to Google Photos for cloud cleanup.
+brownfield:
+  current_system: Three Google accounts and two divergent older drives containing
+    family media, including potentially unique originals.
+  preserved_behavior:
+  - Existing source media remains available until archive integration and hash verification
+    succeed.
+  compatibility_constraints: []
+non_goals:
+- statement: Maintain a second synchronized archive copy in the first version.
+  rationale: The user chose to start with one verified archive copy.
+- statement: Support concurrent or independent operation by multiple users.
+  rationale: The user specified one operator on one computer.
+- statement: Provide a search user interface in the initial scope.
+  rationale: The catalog retains information needed for later searching and filtering.
+open_questions:
+- id: Q-005
+  question: Can Google Photos cleanup reliably identify and remove eligible items
+    across available and missing references?
+  owner: external
+  blocking: false
+  status: accepted_risk
+  related_refs:
+  - D-010
+  - FR-006
+  - U-007
+- id: Q-006
+  question: The exact information retained to support a later cloud-cleanup retry
+    has not been specified; user accepted this gap for handoff.
+  owner: prd
+  blocking: false
+  status: open
+  related_refs:
+  - FR-006
+  - FR-008
+  - D-010
+- id: Q-007
+  question: The catalog must be lightweight, but no measurable threshold has been
+    specified; user accepted this gap for handoff.
+  owner: prd
+  blocking: false
+  status: open
+  related_refs:
+  - NFR-001
+  - D-009
+checkpoint:
+  phase: completed
+  completed_phases:
+  - reconciliation
+  - direction
+  - scope
+  - requirements
+  - review
+  status: ready_with_unknowns
+  reviewed_by_user: true
+  quality_check: warned
+created: '2026-11-12'
+updated: '2026-11-12'

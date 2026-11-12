@@ -1,0 +1,56 @@
+﻿schema_version: 1
+project: null
+context_type: brownfield
+original_idea: "I want to sole problem of my android phone google cloud space beeing full... again and again over again... same for my wife, and kid"
+problem:
+  statement: "Google cloud storage repeatedly becomes full for the user and their family."
+  affected_actors:
+    - role: User
+      context: Android phone user
+    - role: Wife
+      context: null
+    - role: Child
+      context: null
+  trigger: "Google account storage fills or approaches capacity; photos and videos accumulate awaiting archiving."
+  current_approach: "Remove some of the largest items; the user and wife each pay for an extra 100 GB of Google storage. Previously, the user manually copied files to two remote hard drives, which are now outdated and out of sync. The three family members use separate Google accounts."
+  impact: "Taking photos and videos is affected; finding items to remove is difficult and time-consuming. Phone changes and manual copies leave many files and duplicates that are difficult to manage, while the family does not want to lose older photos and videos."
+intent:
+  motivation: "Solve the recurring problem of full cloud storage for the family."
+  desired_outcomes:
+    - Keep taking photos and videos while preserving older ones.
+    - Spend less time dealing with full storage, with a repeatable process that does not need to be relearned each time.
+    - Occasionally browse preserved photos and videos on a connected drive in folders organized by year.
+    - Preserve the archive on both drives and keep the two archive storages easily in sync.
+brownfield:
+  existing_system: Three separate Google accounts and two outdated, out-of-sync archive drives containing older material, including photos and videos that exist only on the drives and date back 20 years or more.
+  proposed_change: Bring the archives into a reliable state and make ongoing archiving and synchronization manageable.
+  must_preserve:
+    - Existing older photos and videos, including those found only on the archive drives.
+assumptions: []
+constraints:
+  - Recurring Google payments are a hassle.
+  - The user is open to an existing solution and would consider making one if none is feasible.
+decisions: []
+open_questions:
+  - id: Q-001
+    question: What feasible existing approaches can safely reconcile the older drives, handle duplicates and phone changes, archive the three accounts, and support freeing space?
+    kind: research
+    blocking: false
+checkpoint:
+  phase: completed
+  completed_phases:
+    - framing
+    - actors_context
+    - outcomes_constraints
+    - review
+  status: ready_with_unknowns
+  reviewed_by_user: true
+created: "2026-11-07"
+updated: "2026-11-07"
+
+
+
+
+
+
+

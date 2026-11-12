@@ -1,0 +1,1730 @@
+schema_version: 2
+project: null
+context_type: brownfield
+ideation:
+  path: context/foundation/ideation.yaml
+  schema_version: 1
+problem_assessment:
+  assessment: supported
+  reframing_needed: false
+  notes: User reports recurring storage pressure and irreplaceable drive-only media; manual workflows
+    are already tried and too cumbersome to repeat or recommend to a nontechnical relative.
+success_criteria:
+- id: SC-001
+  criterion: Preserve existing media, including files found only on old drives.
+  priority: hard
+  source: Ideation brownfield.must_preserve
+  verification: user_confirmed
+- id: SC-002
+  criterion: Continue capturing photos while relieving recurring storage pressure across three accounts.
+  priority: important
+  source: Ideation desired outcomes
+  verification: user_confirmed
+- id: SC-003
+  criterion: Maintain two easily synchronized archive copies and browse by year.
+  priority: important
+  source: Ideation desired outcomes
+  verification: user_confirmed
+- id: SC-004
+  criterion: Make ongoing work repeatable and reduce time spent managing storage.
+  priority: important
+  source: Ideation desired outcomes
+  verification: user_confirmed
+- id: SC-005
+  criterion: Avoid or reduce recurring payment hassle.
+  priority: important
+  source: Ideation constraints; reduction inferred
+  verification: inferred
+- id: SC-006
+  criterion: A nontechnical relative can adopt and repeat the solution without relearning a cumbersome
+    process; ongoing work should be minimal.
+  priority: hard
+  source: User clarification 2026-11-08
+  verification: user_confirmed
+system_context:
+  boundaries:
+  - Three separate Google accounts, Android devices and two divergent archive drives.
+  - Google storage includes services beyond Photos; account contents and sizes are unverified.
+  existing_capabilities:
+  - Google Takeout exports, storage management and family plan sharing.
+  - Two existing drives, health and capacity unverified.
+  critical_dependencies:
+  - Working hardware and sufficient temporary capacity; account access and supervised-account restrictions.
+  - Reliable export, metadata handling, non-destructive reconciliation and recovery verification.
+sources:
+- id: S-001
+  title: Ideation
+  source_type: local_artifact
+  locator: context/foundation/ideation.yaml
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-002
+  title: Google data export
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/3024190?hl=en
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-003
+  title: Google Photos storage management
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/9284827?hl=en
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-004
+  title: Google Photos deletion and backup
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6193313?co=GENIE.Platform%3DAndroid&hl=en
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-005
+  title: Google One family sharing
+  source_type: official_documentation
+  locator: https://support.google.com/googleone/answer/9004015?hl=en
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-006
+  title: FreeFileSync comparison
+  source_type: official_documentation
+  locator: https://freefilesync.org/manual.php?topic=comparison-settings
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-007
+  title: Google Photos transfer
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/9666875?hl=en
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-008
+  title: User clarification on manual work and usability
+  source_type: user_report
+  locator: Conversation, 2026-11-08
+  accessed_on: '2026-11-08'
+  verification: reported_by_user
+- id: S-009
+  title: Synology BeeStation Plus
+  source_type: vendor
+  locator: https://bee.synology.com/en-us/BeeStation/Plus-Series
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-010
+  title: BeeStation external drive photo transfer
+  source_type: official_documentation
+  locator: https://kb.synology.com/en-us/BeeStation/tutorial/BeePhotos_transfer_from_external_drive
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-011
+  title: BeeStation backup and restore
+  source_type: official_documentation
+  locator: https://kb.synology.com/en-eu/BeeStation/tutorial/BeeStation_backup_restore
+  accessed_on: '2026-11-08'
+  verification: directly_checked
+- id: S-012
+  title: Google Photos API changes
+  source_type: official_documentation
+  locator: https://developers.google.com/photos/support/updates
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-013
+  title: Google Photos Picker API
+  source_type: official_documentation
+  locator: https://developers.google.com/photos/picker/guides/get-started-picker
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-014
+  title: Select multiple photos in Google Photos
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6220402?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-015
+  title: Delete photos and videos in Google Photos
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6128858?co=GENIE.Platform%3DDesktop
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-016
+  title: Manage Google Photos storage
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/9284827?co=GENIE&hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-017
+  title: BeeStation user guide
+  source_type: official_documentation
+  locator: https://global.download.synology.com/download/Document/Hardware/HIG/BeeStation/24-year/BST170-8T/enu/BeeStation_Plus_BST170_8T_HIG_enu.pdf
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-018
+  title: User rejection of BeeStation on price and bundled hardware
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-019
+  title: Download or transfer Google data with Takeout
+  source_type: official_documentation
+  locator: https://support.google.com/accounts/answer/3024190?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-020
+  title: Copy Google Photos data to another service
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/9666875?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-021
+  title: Google Photos Delete Tool source repository
+  source_type: other
+  locator: https://github.com/SylphxAI/Google-Photos-Delete-Tool
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-022
+  title: Google Photos Delete Tool Chrome Web Store listing
+  source_type: vendor
+  locator: https://chromewebstore.google.com/detail/google-photos-delete-tool/jiahfbbfpacpolomdjlpdpiljllcdenb
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-023
+  title: User assessment of available Google Photos removal options
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-024
+  title: Change existing Google Photos media to Storage saver
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6220791?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-025
+  title: Google Photos storage usage and Storage saver
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/10100180?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-026
+  title: User rejection of Google Photos Storage saver
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-027
+  title: Import photos and videos from phone to PC
+  source_type: official_documentation
+  locator: https://support.microsoft.com/en-us/windows/apps/photos/import-photos-and-videos-from-phone-to-pc
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-028
+  title: Media Transfer Protocol backup with SyncBack
+  source_type: vendor
+  locator: https://support.2brightsparks.com/resources/articles/mtp.html
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-029
+  title: SyncBack MTP connection trigger and limitations
+  source_type: vendor
+  locator: https://www.2brightsparks.com/syncback/help/mtp.htm
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-030
+  title: Google System Services Release Notes
+  source_type: official_documentation
+  locator: https://support.google.com/product-documentation/answer/14343500?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-031
+  title: Share files between Android and Windows with Quick Share
+  source_type: official_documentation
+  locator: https://support.google.com/android/answer/13801258?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-032
+  title: Transfer files between your computer and Android device
+  source_type: official_documentation
+  locator: https://support.google.com/android/answer/9064445?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-033
+  title: Free up space on your Android device with Google Photos
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6128843?hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-034
+  title: Back up photos and videos with Google Photos
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/6193313?co=GENIE.Platform%3DAndroid&hl=en
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-035
+  title: User-reported Galaxy S25 photo removal observation
+  source_type: user_report
+  locator: Conversation, 2026-11-11; file 20261111_214936.jpg
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-036
+  title: Microsoft Windows Portable Devices API
+  source_type: official_documentation
+  locator: https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/wpd-application-programming-interface
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-037
+  title: Microsoft WPD client interfaces
+  source_type: official_documentation
+  locator: https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/client-interfaces
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-038
+  title: User-session read-only Galaxy S25 MTP enumeration
+  source_type: other
+  locator: PowerShell Shell.Application COM enumeration, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-039
+  title: Samsung S25 MTP read-only probe notes and PowerShell prototype
+  source_type: local_artifact
+  locator: context/foundation/samsung-s25-mtp-probe.md
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-040
+  title: Samsung S25 test photo metadata and copy evidence
+  source_type: local_artifact
+  locator: context/foundation/samsung-s25-photo-20261111_222543-evidence.md
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-041
+  title: User report about the Windows delete-verb response
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-042
+  title: Read-only re-enumeration after photo delete attempts
+  source_type: other
+  locator: Windows Shell COM, Galaxy S25 DCIM/Camera, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-043
+  title: User report that no delete confirmation appeared
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-044
+  title: C# IFileOperation MTP delete attempt result
+  source_type: other
+  locator: Inline C# COM probe using Windows IFileOperation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-045
+  title: Third exact-photo Shell delete retry
+  source_type: other
+  locator: Visible PowerShell process with Shell.Application COM, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-046
+  title: Read-only S25 camera-folder check after third delete retry
+  source_type: other
+  locator: Windows Shell COM, Galaxy S25 DCIM/Camera, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-047
+  title: Microsoft Windows classic WPD sample deletion implementation
+  source_type: official_documentation
+  locator: https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/PortableDeviceCOM/cpp/ContentTransfer.cpp
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-048
+  title: Microsoft IPortableDeviceContent interface
+  source_type: official_documentation
+  locator: https://learn.microsoft.com/en-us/windows/win32/api/portabledeviceapi/nn-portabledeviceapi-iportabledevicecontent
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-049
+  title: Microsoft WPD MTP support and Explorer portable device context
+  source_type: official_documentation
+  locator: https://learn.microsoft.com/en-us/windows-hardware/drivers/portable/wpd-drivers-overview
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-050
+  title: User report of sound with no visible dialog and ineffective key presses
+  source_type: user_report
+  locator: Conversation, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: reported_by_user
+- id: S-051
+  title: Direct C# WPD deletion probe on the Galaxy S25
+  source_type: local_artifact
+  locator: .tmp/wpd-delete-probe/Program.cs and probe console output, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-052
+  title: Read-only WPD re-enumeration after direct delete
+  source_type: other
+  locator: C# IPortableDeviceContent enumeration of Galaxy S25, 2026-11-11
+  accessed_on: '2026-11-11'
+  verification: directly_checked
+- id: S-053
+  title: Google Photos API changes
+  source_type: official_documentation
+  locator: https://developers.google.com/photos/support/updates
+  accessed_on: '2026-11-12'
+  verification: directly_checked
+- id: S-054
+  title: Google Photos file name details guidance
+  source_type: official_documentation
+  locator: https://support.google.com/photos/answer/14216130?hl=en-en
+  accessed_on: '2026-11-12'
+  verification: directly_checked
+- id: S-055
+  title: Playwright locator and actionability documentation
+  source_type: official_documentation
+  locator: https://playwright.dev/docs/locators and https://playwright.dev/docs/actionability
+  accessed_on: '2026-11-12'
+  verification: directly_checked
+- id: S-056
+  title: Google Photos media item resource
+  source_type: official_documentation
+  locator: https://developers.google.com/photos/library/reference/rest/v1/mediaItems
+  accessed_on: '2026-11-12'
+  verification: directly_checked
+- id: S-057
+  title: Google Takeout sidecar field observations
+  source_type: other
+  locator: https://www.fixmytakeout.com/takeout/ and https://www.foliosort.app/google-photos/takeout-json-files
+  accessed_on: '2026-11-12'
+  verification: directly_checked
+- id: S-058
+  title: User-provided Takeout sidecar and metadata availability observations
+  source_type: user_report
+  locator: Conversation, 2026-11-12; one sample sidecar and user observations
+  accessed_on: '2026-11-12'
+  verification: reported_by_user
+findings:
+- id: F-001
+  topic: problem_framing
+  statement: The family reports two divergent drives containing potentially unique older files.
+  classification: user_reported
+  source_ids:
+  - S-001
+  implications: Neither drive can safely be treated as a disposable mirror.
+- id: F-002
+  topic: prior_art
+  statement: Takeout downloads copies without deleting originals; filesystem timestamps can change and
+    additional Google metadata can be in JSON.
+  classification: evidence_backed
+  source_ids:
+  - S-002
+  implications: Export and date organization need verification; Takeout alone neither removes cloud items
+    nor frees storage.
+- id: F-003
+  topic: limitations
+  statement: Device cleanup removes device files, while cloud deletion and backup settings have different
+    consequences. Some photos do not count toward storage and supervised accounts may lack storage management.
+  classification: evidence_backed
+  source_ids:
+  - S-003
+  - S-004
+  implications: Confirm account-specific savings and deletion behavior before deleting.
+- id: F-004
+  topic: prior_art
+  statement: Google One can share storage with up to five family members without sharing their files,
+    subject to eligibility.
+  classification: evidence_backed
+  source_ids:
+  - S-005
+  implications: One subscription may simplify payments but does not reconcile or back up old drives.
+- id: F-005
+  topic: prior_art
+  statement: FreeFileSync compares matching relative paths and offers content comparison.
+  classification: evidence_backed
+  source_ids:
+  - S-006
+  implications: It can check matching paths but does not establish global duplicate identity across different
+    paths.
+- id: F-006
+  topic: limitations
+  statement: Google can transfer copies to supported services; unsupported files may be excluded and repeat
+    transfers can duplicate items.
+  classification: evidence_backed
+  source_ids:
+  - S-007
+  implications: A cloud migration requires separate completeness and duplicate checks.
+- id: F-007
+  topic: problem_framing
+  statement: The user has already used a manual archive approach and finds repeated relearning, labor
+    and monthly payments unacceptable; a nontechnical relative should be able to use the solution.
+  classification: user_reported
+  source_ids:
+  - S-008
+  implications: Manual exports and sync are not sufficient as the end-state recommendation.
+- id: F-008
+  topic: prior_art
+  statement: BeeStation Plus offers phone photo backup, a photo app, and backup to an external drive or
+    Synology NAS; it can transfer photos from external drives.
+  classification: evidence_backed
+  source_ids:
+  - S-009
+  - S-010
+  - S-011
+  implications: An appliance is a plausible lower-maintenance alternative, but migration, duplicates,
+    two independently browsable archives and real usability are not established.
+- id: F-009
+  topic: limitations
+  statement: Current Google Photos APIs cannot enumerate and delete arbitrary items from an existing personal
+    library. The Picker API exposes only user-selected media, while the Library API is limited to app-created
+    content.
+  classification: evidence_backed
+  source_ids:
+  - S-012
+  - S-013
+  implications: Supported APIs do not allow automated whole-library matching or deletion; use user-facing
+    controls or another route.
+- id: F-010
+  topic: feasibility
+  statement: Google Photos web supports selecting a continuous range of photos with Shift-click, and its
+    storage manager offers recommended cleanup categories. Deletion is not an automated archive match,
+    and deleting in Photos can remove synced local copies on devices with backup enabled. Items remain
+    in Trash for 30 days; permanently deleted items cannot be recovered with Takeout.
+  classification: evidence_backed
+  source_ids:
+  - S-014
+  - S-015
+  - S-016
+  implications: Cleanup is not limited to one-item-at-a-time selection, but batch sizes, review burden,
+    account-specific savings and safe phone behavior require a reversible trial after verified archive
+    copies exist.
+- id: F-011
+  topic: prior_art
+  statement: BeeStation documentation supports mobile photo backup, invited users with separate files,
+    and scheduled backup to an external drive or paid C2 storage. Reviewed documentation does not establish
+    automated import and reconciliation of three Google Photos libraries or two independently browsable
+    year-organized archives.
+  classification: evidence_backed
+  source_ids:
+  - S-017
+  - S-009
+  - S-010
+  - S-011
+  implications: BeeStation remains a plausible phone-ingest and browse appliance, but migration, archive
+    layout and recoverability still need validation.
+- id: F-012
+  topic: constraints
+  statement: The user rejects BeeStation because it is a high-price option that bundles hardware into
+    its sale package.
+  classification: user_reported
+  source_ids:
+  - S-018
+  implications: Remove BeeStation from the viable shortlist on the user's stated cost preference; do not
+    spend further research effort validating it unless the user reopens the option.
+- id: F-013
+  topic: limitations
+  statement: Google Takeout creates and delivers downloadable data archives, and its Photos transfer option
+    copies supported items to another service. Neither capability removes photos from the Google Photos
+    library; deleting items and freeing Google storage requires a separate action.
+  classification: evidence_backed
+  source_ids:
+  - S-019
+  - S-020
+  implications: Treat Takeout strictly as an export or copy step in the archive workflow; it cannot perform
+    cloud cleanup or storage recovery.
+- id: F-014
+  topic: prior_art
+  statement: Google Photos has a native Undo device backup action that removes from Google Photos all
+    photos and videos currently found on the selected device while keeping those local files on that device.
+    It also removes them from albums, shared albums, search results and memories; device-folder and Locked
+    Folder items are included. Backup is turned off on that device, but other devices on the same account
+    or partner auto-save can upload the media again.
+  classification: evidence_backed
+  source_ids:
+  - S-015
+  implications: This is a supported bulk cloud-removal route for media present on a phone, but it does
+    not cover cloud-only older media or prove that the complete family archive exists on each device.
+    Preventing re-upload requires checking backup on the account's other devices and partner auto-save
+    settings; leaving backup off also removes automatic cloud backup for new photos from that device.
+- id: F-015
+  topic: prior_art
+  statement: Third-party browser extensions exist that automate Google Photos web selection and moving
+    items to Trash through the visible page because the supported Photos API cannot delete arbitrary existing
+    library items. One inspected open-source project offers dry run, batches, stopping, and duplicate
+    review; the Chrome Web Store listing reports 10,000 users. The tool operates on the current Photos
+    view and its date/type filters are partly paid; it does not claim to match a Takeout archive manifest
+    against Google Photos.
+  classification: evidence_backed
+  source_ids:
+  - S-021
+  - S-022
+  - S-012
+  implications: Browser automation can reduce repetitive UI work for broad or filtered deletion, but it
+    remains dependent on Google's changing page, requires a trusted extension with access to the signed-in
+    Photos page, and does not solve exact archive-to-cloud matching. A non-destructive preview and a limited
+    trial are prerequisites before any bulk run.
+- id: F-016
+  topic: constraints
+  statement: The user assesses all three currently identified Google Photos removal optionsâ€”native Undo
+    device backup, manual web range selection, and third-party browser-extension automationâ€”as cumbersome
+    or unfeasible for the family's intended workflow.
+  classification: user_reported
+  source_ids:
+  - S-023
+  implications: Exclude all three options from the acceptable solution shortlist; do not recommend a trial
+    or implementation of them as the end-state. Continue searching for a materially different removal
+    approach that meets the user's low-effort requirement.
+- id: F-017
+  topic: prior_art
+  statement: Google Photos offers a built-in Recover storage action to convert existing eligible Original
+    quality media to Storage saver, and a separate setting for future backup quality. Storage saver compresses
+    photos, can resize photos above 16 MP and videos above 1080p, and may leave some files uncompressed.
+    Storage saver uploads after June 1, 2021 still count toward account storage; the conversion is available
+    at most once per day and is hidden for accounts with unlimited Photos storage.
+  classification: evidence_backed
+  source_ids:
+  - S-024
+  - S-025
+  implications: This was investigated as a possible non-deletion path, but the user rejected the risk
+    of altering media and it is excluded from acceptable options.
+- id: F-018
+  topic: constraints
+  statement: The user rejects Storage saver because it may alter original media and they do not want to
+    risk unintended data corruption.
+  classification: user_reported
+  source_ids:
+  - S-026
+  implications: Exclude Recover storage and Storage saver from acceptable solution options; do not treat
+    a local copy as sufficient justification to change cloud media.
+- id: F-019
+  topic: prior_art
+  statement: Windows Photos can import selected photos and videos from an unlocked Android phone over
+    a file-transfer USB cable; the user chooses what to import and the destination.
+  classification: evidence_backed
+  source_ids:
+  - S-027
+  implications: This is a straightforward copy/import path, but the documented workflow is user-driven
+    and does not establish automatic import or two-drive verification.
+- id: F-020
+  topic: limitations
+  statement: SyncBackPro/SE can run an MTP backup profile when a USB-connected phone is detected, but
+    MTP requires the phone unlocked and does not support SyncBack's verification, hash comparison, integrity
+    check or file versioning; device behavior and metadata support vary.
+  classification: evidence_backed
+  source_ids:
+  - S-028
+  - S-029
+  implications: Connection-triggered copying exists, but this option does not meet the preservation confidence
+    threshold without an independent verification method and device-specific trial; it is also unavailable
+    in SyncBackFree.
+- id: F-021
+  topic: prior_art
+  statement: Google documents automatic Android-to-Windows photo/video backup using Quick Share in Google
+    Play services v26.43, dated 2026-11-02; the public release note does not describe setup, eligibility
+    or transfer behavior, and Google's general feature notes say some features may be experimental or
+    limited to certain users.
+  classification: evidence_backed
+  source_ids:
+  - S-030
+  implications: This is a promising low-effort PC-ingest lead, but availability on the family's phones
+    and whether it safely and completely copies original files remain unverified. Googleâ€™s published
+    Quick Share guide describes ordinary user-initiated sharing, not this backup feature.
+- id: F-022
+  topic: limitations
+  statement: Copying new phone media to a PC does not remove existing items from Google Photos or itself
+    stop future Google Photos uploads.
+  classification: evidence_backed
+  source_ids:
+  - S-027
+  - S-031
+  implications: Even a successful local-ingest workflow only limits future quota growth if Photos backup
+    is separately turned off on each relevant phone; the current cloud library and its storage use remain.
+- id: F-023
+  topic: prior_art
+  statement: Android's documented Windows USB File Transfer workflow is to unlock the phone, connect by
+    cable, select File Transfer in the USB notification, drag files in Windows, eject, and unplug; it
+    is a user-operated file move/copy interface rather than an automatic backup.
+  classification: evidence_backed
+  source_ids:
+  - S-032
+  implications: This is the precise low-cost wired workflow the user meant; evaluate manual selection/transfer
+    burden and how to verify copied originals before any phone-side removal.
+- id: F-024
+  topic: limitations
+  statement: USB File Transfer does not itself instruct Google Photos to delete or alter a cloud item.
+    Google Photos can still display a local photo and its backup status; Google's Free up space function
+    explicitly removes device copies while retaining backed-up photos in the Photos library. The reviewed
+    documentation does not establish the effect of deleting a file through every Android file manager
+    on all device models or sync configurations.
+  classification: evidence_backed
+  source_ids:
+  - S-032
+  - S-033
+  - S-034
+  implications: Copying to PC alone should be treated as a separate local copy. Do not delete the phone
+    copy until the PC copy is confirmed; if removing it, use a tested device-specific method and check
+    that it remains in Google Photos. The cloud copy continues to use Google storage.
+- id: F-025
+  topic: limitations
+  statement: In a user-observed test on a Samsung Galaxy S25, manually deleting the phone file 20261111_214936.jpg
+    made it disappear from the phone's Google Photos app view, while the user could still open the same
+    item through its photos.google.com link.
+  classification: user_reported
+  source_ids:
+  - S-035
+  implications: The local item disappearing from the app does not establish that the cloud copy was deleted;
+    in this single test the web item remained. Treat the browser link as evidence of the surviving cloud
+    item, while recognizing that a one-photo test does not establish all app states or devices.
+- id: F-026
+  topic: prior_art
+  statement: Windows' built-in Shell COM interface successfully enumerated the connected Samsung Galaxy
+    S25, its internal storage folders and DCIM/Camera contents in a read-only probe; the manually removed
+    photo was no longer on the phone. Microsoft's WPD API is the documented application interface for
+    enumerating portable-device objects and transferring content.
+  classification: evidence_backed
+  source_ids:
+  - S-036
+  - S-037
+  - S-038
+  implications: Shell enumeration is demonstrated; later direct WPD enumeration and one-object deletion
+    supersede the earlier untested status (F-033). Neither proves reliable bulk transfer or cloud removal.
+- id: F-027
+  topic: prior_art
+  statement: A reproducible, read-only PowerShell prototype using Windows Shell.Application COM is documented
+    for enumerating the connected Galaxy S25, internal storage and DCIM/Camera.
+  classification: evidence_backed
+  source_ids:
+  - S-038
+  - S-039
+  implications: Reuse the probe as the known-good baseline when comparing a direct C# WPD implementation;
+    it lists names and modified details only and does not establish transfer integrity.
+- id: F-028
+  topic: prior_art
+  statement: A C# probe using Windows Shell COM found 20261111_222543.jpg on the S25, copied it locally,
+    and exposed Windows Shell properties; EXIF decoded from the local copy reports a 4000x3000 Samsung
+    Galaxy S25 JPEG captured at 2026-11-11 22:25:43, f/1.8, ISO 800, 5.4 mm (59 mm equivalent), with no
+    GPS EXIF tag. The local copy is 2,528,963 bytes with SHA-256 D7143FCED513DB4862F8666CC2A9AA23D04E7EB51899BF249CFE1CDA59314FAA.
+  classification: evidence_backed
+  source_ids:
+  - S-040
+  implications: This provides a concrete MTP read-and-copy prototype and media metadata record; MTP exposed
+    no source hash for byte-for-byte verification, and the local copy is retained temporarily as a safety
+    copy.
+- id: F-029
+  topic: limitations
+  statement: The Shell COM delete verb stalled after a sound with no visible popup, and a Shift+Delete-style
+    Windows IFileOperation attempt failed to parse the MTP shell path (HRESULT 0x80070057) before queuing
+    deletion. Read-only re-enumeration confirmed the exact photo remains on the S25.
+  classification: evidence_backed
+  source_ids:
+  - S-041
+  - S-042
+  - S-043
+  - S-044
+  implications: Neither attempt deleted the file. The evidence copy remains local; the direct WPD IPortableDeviceContent.Delete
+    operation has not yet been successfully exercised from C#.
+- id: F-030
+  topic: limitations
+  statement: A third attempt invoked the exact photo's Shell delete verb from a separate visible PowerShell
+    process, but the computer-control connection could not inspect that process; subsequent read-only
+    enumeration still found the photo in DCIM/Camera.
+  classification: evidence_backed
+  source_ids:
+  - S-045
+  - S-046
+  implications: Phone-side deletion remains unconfirmed; the exact photo was still present at the latest
+    check.
+- id: F-031
+  topic: feasibility
+  statement: Microsoft?s Windows-classic-samples WPD sample deletes a device object by adding its object
+    ID to an IPortableDevicePropVariantCollection and calling IPortableDeviceContent::Delete with PORTABLE_DEVICE_DELETE_NO_RECURSION;
+    Microsoft describes IPortableDeviceContent as supporting device content enumeration and deletion,
+    and WPD supports MTP devices.
+  classification: evidence_backed
+  source_ids:
+  - S-047
+  - S-048
+  - S-049
+  implications: The official direct WPD route was subsequently tested successfully for one device object
+    (F-033); this does not establish cloud deletion or a complete workflow.
+- id: F-032
+  topic: limitations
+  statement: On the latest retry, the user heard the device/system sound but saw no popup and pressing
+    Y, Enter or Escape had no visible effect.
+  classification: user_reported
+  source_ids:
+  - S-050
+  implications: The Shell delete attempt provides no usable visible prompt or confirmation; do not infer
+    deletion from the sound, and verify device state through read-only enumeration.
+- id: F-033
+  topic: feasibility
+  statement: A C# probe using Windows WPD COM enumerated the Samsung Galaxy S25, identified the unique
+    object ID o5A9 for 20261111_222543.jpg at Pami?? wewn?trzna/DCIM/Camera, and called IPortableDeviceContent::Delete
+    once with PORTABLE_DEVICE_DELETE_NO_RECURSION; the API returned S_OK. A subsequent read-only WPD enumeration
+    no longer found the target.
+  classification: evidence_backed
+  source_ids:
+  - S-047
+  - S-051
+  - S-052
+  implications: Direct WPD deletion is now demonstrated on this S25 for one explicitly matched object.
+    This confirms device removal only; Google Photos cloud status and behavior were not checked by this
+    probe. The first C# property query failed because it requested unsupported keys; using GetSupportedProperties
+    before GetValues resolved enumeration safely.
+- id: F-034
+  topic: limitations
+  statement: Google documents that the Photos web Details panel can display an item's file name, but the
+    supported Photos APIs are restricted to app-created content and Picker API selection; they do not
+    provide general enumeration or deletion of arbitrary existing library items. Playwright can interact
+    with visible web controls using role, text and other locators with auto-waiting and actionability
+    checks, but those browser capabilities do not establish stable archive-to-cloud identity matching
+    or safe deletion targeting.
+  classification: evidence_backed
+  source_ids:
+  - S-053
+  - S-054
+  - S-055
+  implications: Playwright could automate a known item if a sidecar URL is valid and its media is matched
+    to verified local copies, but URL coverage, persistence and the full identity chain remain untested.
+    Do not treat a filename or date match alone as proof where duplicates or edited variants exist.
+- id: F-035
+  topic: feasibility
+  statement: Google's supported MediaItem resource defines a persistent media item ID and a signed-in-user
+    Photos product URL, but API listing and retrieval are now restricted to app-created items. Secondary
+    documentation and inspected public examples of Takeout sidecars report a per-item url field containing
+    a photos.google.com/photo/â€¦ link, alongside title and metadata. The Takeout URL may therefore provide
+    the Google Photos item identifier without using the general-library API.
+  classification: evidence_backed
+  source_ids:
+  - S-056
+  - S-057
+  implications: This materially improves feasibility of linking a Takeout record to a cloud-side item
+    URL. It does not establish that every exported item has a URL, that the URL identifier survives all
+    edits/duplicates or remains usable, or that matching Takeout media bytes to the archive and phone
+    is accurate; inspect representative actual exports before relying on the link for deletion.
+- id: F-036
+  topic: feasibility
+  statement: The user supplied one Takeout photo sidecar containing a Google Photos item URL, title, timestamps,
+    location and Android upload origin. The user reports that some media, often saved from WhatsApp, lacks
+    metadata; exports from other devices might supply metadata for some items but this remains unverified.
+  classification: user_reported
+  source_ids:
+  - S-058
+  implications: One URL field is observed in a user-provided example, not independently tested for accessibility,
+    completeness, stable identity or correspondence to an API ID. Preserve metadata-free originals; seek
+    corroborating records across accounts/devices without assuming coverage or equivalence.
+candidates:
+- id: C-001
+  name: Google Takeout and storage management
+  kind: existing_capability
+  relevance: Export each account and identify storage consumers.
+  limitations:
+  - Export and deletion are separate; metadata and completeness need review.
+  source_ids:
+  - S-002
+  - S-003
+  disposition: unsuitable
+- id: C-002
+  name: Google One family sharing
+  kind: service
+  relevance: Potentially consolidate storage payments across accounts.
+  limitations:
+  - Recurring payment and no reconciliation of old drives.
+  source_ids:
+  - S-005
+  disposition: promising
+- id: C-003
+  name: FreeFileSync
+  kind: product
+  relevance: Compare and synchronize archive folders.
+  limitations:
+  - Path-based comparison does not resolve all renamed duplicates or conflicts; unsafe actions remain
+    possible.
+  source_ids:
+  - S-006
+  disposition: promising
+- id: C-004
+  name: Google transfer to another service
+  kind: existing_capability
+  relevance: Copy cloud libraries to supported services.
+  limitations:
+  - Unsupported items and repeat-transfer duplicates; destination fees and drive archive remain.
+  source_ids:
+  - S-007
+  disposition: uncertain
+- id: C-005
+  name: Synology BeeStation and BeePhotos
+  kind: product
+  relevance: Appliance with phone backup and external drive transfer and backup.
+  limitations:
+  - Hardware and secondary storage cost; single internal drive; import, duplicate reconciliation and archive
+    restore format require testing.
+  - Automated Google Photos migration and cloud deletion workflow not established.
+  source_ids:
+  - S-009
+  - S-010
+  - S-011
+  - S-018
+  disposition: unsuitable
+- id: C-006
+  name: Google Photos Picker API
+  kind: existing_capability
+  relevance: Lets the user select Photos items for an application to read and download.
+  limitations:
+  - Does not support whole-library enumeration or deletion of selected media.
+  - User selection is required, so it does not provide automated 10,000-item cleanup.
+  source_ids:
+  - S-012
+  - S-013
+  disposition: unsuitable
+- id: C-007
+  name: Google Photos Undo device backup
+  kind: existing_capability
+  relevance: Natively removes cloud copies for photos and videos currently on an Android device while
+    retaining the local copies.
+  limitations:
+  - Only covers items currently found on that device; cloud-only historical items remain.
+  - Removes items from albums, shared albums, search results and memories, and backup must remain off
+    to avoid re-upload.
+  source_ids:
+  - S-015
+  disposition: unsuitable
+- id: C-008
+  name: Browser extension bulk deletion through Google Photos UI
+  kind: product
+  relevance: Automates selection and moving large batches or a whole view to Trash; some tools offer dry
+    run, stop controls and duplicate review.
+  limitations:
+  - Not a Google-supported API; UI changes can break automation and destructive mis-clicks are possible.
+  - No inspected option matches specific Takeout-verified files to cloud items; current-view, date or
+    type deletion can include unarchived content.
+  - Extension code, permissions and privacy claims need independent review; Trash is only a temporary
+    recovery path and emptying it is irreversible.
+  source_ids:
+  - S-021
+  - S-022
+  - S-012
+  disposition: unsuitable
+- id: C-009
+  name: Google Photos Recover storage and Storage saver backup quality
+  kind: existing_capability
+  relevance: Convert eligible existing Original quality media to a lower-storage quality in one account
+    action and set future phone backups to Storage saver.
+  limitations:
+  - Changes the cloud copy's quality, including resizing photos over 16 MP and videos over 1080p; some
+    formats cannot be compressed.
+  - Storage saver uploads after June 1, 2021 still count toward quota, so this reduces rather than removes
+    usage and does not guarantee capacity will stop filling.
+  - The Recover storage action is per account, once per day, unavailable for unlimited-storage accounts;
+    future backup quality must be set separately on each device.
+  source_ids:
+  - S-024
+  - S-025
+  - S-026
+  disposition: unsuitable
+- id: C-010
+  name: Windows Photos USB import
+  kind: existing_capability
+  relevance: Import selected Android photos and videos to a chosen PC folder over USB.
+  limitations:
+  - Requires an unlocked phone and user selection/import.
+  - Does not automatically create a second archive copy or reclaim existing Google Photos storage.
+  source_ids:
+  - S-027
+  disposition: uncertain
+- id: C-011
+  name: SyncBackPro/SE MTP phone backup
+  kind: product
+  relevance: Can trigger a PC backup profile when an Android MTP device connects by USB.
+  limitations:
+  - MTP lacks SyncBack hash/verification/integrity checks and file versioning; device-specific behavior,
+    unlock and possible metadata constraints remain.
+  - Paid Pro/SE edition required; not supported by SyncBackFree.
+  source_ids:
+  - S-028
+  - S-029
+  disposition: unsuitable
+- id: C-012
+  name: Quick Share automatic Android-to-Windows media backup
+  kind: existing_capability
+  relevance: Google has announced automatic Android photo/video backup to Windows through Quick Share.
+  limitations:
+  - Public setup, eligibility, rollout, completeness and original-file behavior are not documented in
+    the announcement.
+  - Does not remove existing Google Photos media or automatically disable Photos backup.
+  source_ids:
+  - S-030
+  - S-031
+  disposition: uncertain
+- id: C-013
+  name: Android USB File Transfer to Windows PC
+  kind: existing_capability
+  relevance: User connects the unlocked phone by USB-C, selects File Transfer, and drags photo/video files
+    into Windows folders.
+  limitations:
+  - Manual transfer and file selection; no built-in two-drive copy or documented integrity verification.
+  - Moving/deleting the phone copy does not remove the backed-up Google Photos item; cloud storage remains
+    used.
+  - Exact phone-side deletion behavior should be checked for the device and app used; copy first and verify
+    before any removal.
+  source_ids:
+  - S-032
+  - S-033
+  - S-034
+  - S-035
+  disposition: promising
+- id: C-015
+  name: Playwright automation of Google Photos web
+  kind: existing_capability
+  relevance: Official Windows API for enumerating portable devices and transferring files through MTP.
+  limitations:
+  - Low-level COM interfaces; a C# wrapper or interop definitions are needed.
+  - The Samsung S25 was enumerated through Windows Shell COM, but the direct WPD C# path has not yet been
+    tested.
+  source_ids:
+  - S-036
+  - S-037
+  - S-038
+  disposition: promising
+alternatives:
+- id: ALT-001
+  approach: reuse
+  description: Preserve both drive inventories, export accounts, reconcile with existing comparison tools
+    and maintain two verified copies.
+  candidate_ids:
+  - C-001
+  - C-003
+  strengths:
+  - Uses existing capabilities and retains local files.
+  tradeoffs:
+  - Manual export, duplicate review, dates and safe deletion need validation.
+  effort:
+    value: Unknown until archive size and drive condition are assessed.
+    basis: unknown
+  cost:
+    value: Unknown; depends on capacity and any service subscription.
+    basis: unknown
+  evidence_ids:
+  - F-001
+  - F-002
+  - F-004
+  - F-005
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Drive health and capacity untested.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Export does not itself clear space.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Synchronization and year organization need a trial.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Repeat effort unmeasured.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: Local storage costs remain.
+  - criterion_id: SC-006
+    assessment: unmet
+    notes: User reports the manual approach is cumbersome.
+  feasibility: conditional
+  recurring_effort:
+    value: Unknown; depends on volume and frequency.
+    basis: unknown
+  complexity: unknown
+  rejection_reason: User reports the recurring manual workflow is labor-intensive and hard to repeat;
+    a subscription alone does not resolve it.
+- id: ALT-002
+  approach: buy
+  description: Historical cloud-retention option; refined as ALT-009 with explicit lifecycle and coverage.
+  candidate_ids:
+  - C-002
+  - C-003
+  strengths:
+  - Immediate capacity and a single family subscription may reduce admin.
+  tradeoffs:
+  - Recurring subscription and archive work remain.
+  effort:
+    value: Unknown until archive size and drive condition are assessed.
+    basis: unknown
+  cost:
+    value: Unknown; depends on capacity and any service subscription.
+    basis: unknown
+  evidence_ids:
+  - F-001
+  - F-002
+  - F-004
+  - F-005
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Drive reconciliation still required.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Capacity depends on plan and usage.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Independent archive workflow needed.
+  - criterion_id: SC-004
+    assessment: partial
+    notes: Less subscription management; archive work persists.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: One recurring payment remains.
+  - criterion_id: SC-006
+    assessment: unmet
+    notes: User reports the manual approach is cumbersome.
+  feasibility: conditional
+  recurring_effort:
+    value: Unknown; depends on volume and frequency.
+    basis: unknown
+  complexity: unknown
+  rejection_reason: User reports the recurring manual workflow is labor-intensive and hard to repeat;
+    a subscription alone does not resolve it.
+- id: ALT-003
+  approach: integrate
+  description: Transfer libraries to another service and separately reconcile drives.
+  candidate_ids:
+  - C-004
+  - C-003
+  strengths:
+  - May provide another hosted library.
+  tradeoffs:
+  - Transfer gaps, repeated duplicates, costs and additional service operations.
+  effort:
+    value: Unknown until archive size and drive condition are assessed.
+    basis: unknown
+  cost:
+    value: Unknown; depends on capacity and any service subscription.
+    basis: unknown
+  evidence_ids:
+  - F-001
+  - F-002
+  - F-004
+  - F-005
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Old drives still require preservation.
+  - criterion_id: SC-002
+    assessment: unknown
+    notes: Destination eligibility and capacity untested.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Local archive still needed.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Ongoing workflow untested.
+  - criterion_id: SC-005
+    assessment: unknown
+    notes: Destination pricing unknown.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: Ease of use has not been demonstrated.
+  feasibility: unknown
+  recurring_effort:
+    value: Unknown; depends on volume and frequency.
+    basis: unknown
+  complexity: unknown
+  rejection_reason: No demonstrated destination or complete migration, cleanup and two-drive workflow;
+    retained as historical research.
+- id: ALT-004
+  approach: build
+  description: Historical broad custom-build option; superseded by the more specific conditional integrated
+    workflow ALT-008.
+  candidate_ids: []
+  strengths:
+  - Could address verified gaps.
+  tradeoffs:
+  - Development and maintenance costs are unknown; safety is unproven.
+  effort:
+    value: Unknown until archive size and drive condition are assessed.
+    basis: unknown
+  cost:
+    value: Unknown; depends on capacity and any service subscription.
+    basis: unknown
+  evidence_ids:
+  - F-001
+  - F-002
+  - F-004
+  - F-005
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: No implementation or validation.
+  - criterion_id: SC-002
+    assessment: unknown
+    notes: No implementation.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: No implementation.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Maintenance burden unmeasured.
+  - criterion_id: SC-005
+    assessment: unknown
+    notes: Cost unknown.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: Ease of use has not been demonstrated.
+  feasibility: unknown
+  recurring_effort:
+    value: Unknown; depends on volume and frequency.
+    basis: unknown
+  complexity: unknown
+  rejection_reason: null
+- id: ALT-005
+  approach: buy
+  description: Use a consumer photo backup appliance with phone apps and external backup, then migrate
+    existing archives safely.
+  candidate_ids:
+  - C-005
+  strengths:
+  - Ongoing phone uploads and external backups may reduce repeated manual work without a mandatory cloud
+    subscription.
+  tradeoffs:
+  - Upfront hardware, power, administration and backup storage costs; migration and failure recovery remain
+    unproven.
+  effort:
+    value: Unknown; setup and archive migration require a trial.
+    basis: unknown
+  cost:
+    value: Unknown; hardware, secondary storage and power; no verified local price.
+    basis: unknown
+  evidence_ids:
+  - F-007
+  - F-008
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Reconciliation, completeness and restore need testing.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Phone backup supported; existing cloud migration and space recovery unverified.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: External backup supported; two separately browsable year-organized drives not established.
+  - criterion_id: SC-004
+    assessment: partial
+    notes: Automated backup is advertised; maintenance and recovery burden unmeasured.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: No mandatory subscription indicated; hardware and power costs remain.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: A nontechnical user trial is needed.
+  feasibility: unknown
+  recurring_effort:
+    value: Unknown; backup monitoring and recovery still required.
+    basis: unknown
+  complexity: unknown
+  rejection_reason: User explicitly rejects BeeStation as a high-price option bundling hardware into its
+    sale package.
+- id: ALT-006
+  approach: integrate
+  description: Use Takeout and verified local archive copies first, then automate Google Photos UI deletion
+    in bounded batches with a browser extension and explicit review; use native Undo device backup only
+    for device-resident media where its side effects are acceptable.
+  candidate_ids:
+  - C-001
+  - C-007
+  - C-008
+  strengths:
+  - Provides actual bulk-removal mechanisms despite the absence of a supported delete API.
+  - The native route can preserve phone-local files; browser tools can reduce repeated web selection work.
+  tradeoffs:
+  - No proven automatic matching between Takeout files and cloud items; broad automation could delete
+    media not yet archived.
+  - UI automation is fragile and must be reviewed; phone backup and shared-album effects complicate safe
+    cleanup.
+  effort:
+    value: Unknown; depends on device coverage, selection scope and a representative trial.
+    basis: unknown
+  cost:
+    value: Unknown; free and paid browser tools exist, but tool and hardware choices are not validated.
+    basis: unknown
+  evidence_ids:
+  - F-009
+  - F-010
+  - F-013
+  - F-014
+  - F-015
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Safe archive completeness before deletion is not established.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Can remove media from Google Photos in bulk, but full-library coverage and sustained phone
+      backup behavior need testing.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Does not itself create or synchronize two year-organized archive copies.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Automation may reduce clicks, but onboarding, review and maintenance burden are unmeasured.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: Free native device route exists; some extension capabilities may be paid.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: No nontechnical relative trial has been performed.
+  feasibility: conditional
+  recurring_effort:
+    value: Unknown; could be occasional review or repeated UI automation maintenance.
+    basis: unknown
+  complexity: medium
+  rejection_reason: User assesses the native device route, manual range selection and browser-extension
+    automation as cumbersome or unfeasible for the family's workflow.
+- id: ALT-007
+  approach: reuse
+  description: Preserve current full-quality media in two verified local archive copies, then use Google
+    Photos Recover storage for eligible existing items and set Storage saver for future uploads on each
+    phone.
+  candidate_ids:
+  - C-001
+  - C-009
+  strengths:
+  - Avoids bulk photo deletion and per-photo review while reducing the size of existing eligible Originals
+    and future backups.
+  - Keeps Google Photos available for browsing and routine phone backup.
+  tradeoffs:
+  - Google cloud copies lose some resolution or quality; Storage saver items still count against quota
+    and future account growth continues.
+  - Full-quality preservation depends on completing and verifying two local archive copies first; actual
+    storage savings and ongoing device-to-archive process are unknown.
+  effort:
+    value: Unknown; conversion is a single account action, while three phone settings and archive maintenance
+      require assessment.
+    basis: unknown
+  cost:
+    value: Unknown; depends on local archive capacity and whether current Google storage plans remain
+      necessary.
+    basis: unknown
+  evidence_ids:
+  - F-002
+  - F-013
+  - F-017
+  recommendation: not_recommended
+  coverage:
+  - criterion_id: SC-001
+    assessment: unknown
+    notes: Full-quality Takeout and two verified local archive copies are not yet established.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Reduces storage use and future growth but does not guarantee enough space or eliminate future
+      quota use.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Existing drive reconciliation and two-copy synchronization remain separate work.
+  - criterion_id: SC-004
+    assessment: partial
+    notes: Conversion is low-touch, but initial archive verification and three device settings remain.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: May reduce the needed capacity tier, but storage-saver media still counts and account usage
+      is unknown.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: No nontechnical family member trial has been performed.
+  feasibility: conditional
+  recurring_effort:
+    value: Unknown; future storage-saver uploads are automatic, but original-quality local archiving frequency
+      is undecided.
+    basis: unknown
+  complexity: low
+  rejection_reason: User rejects potential alteration of original media and the risk of unintended data
+    corruption.
+- id: ALT-008
+  approach: integrate
+  description: Inventory both drives without overwriting, export each account with Takeout, reconcile
+    originals and metadata into a year-organized archive, verify independent copies and restore samples.
+    For new media use a proven low-effort phone-to-PC intake and repeat verified two-drive synchronization.
+    Only after verification, address cloud quota through a separately validated, acceptable cleanup workflow;
+    do not assume local device deletion frees cloud storage.
+  candidate_ids:
+  - C-001
+  - C-003
+  - C-010
+  - C-011
+  - C-012
+  - C-013
+  - C-015
+  - C-006
+  strengths:
+  - Reuses exports and comparison tools; limits custom work to demonstrated gaps.
+  tradeoffs:
+  - Identity, safe cloud cleanup, repeatable ingest, independent recovery and nontechnical usability remain
+    unproven.
+  effort:
+    value: Initial reconciliation and account export are substantial; unmeasured
+    basis: estimated
+  cost:
+    value: Existing PC and drives assumed; capacity and any subscription or software costs unknown
+    basis: estimated
+  evidence_ids:
+  - F-002
+  - F-005
+  - F-009
+  - F-020
+  - F-021
+  - F-022
+  - F-033
+  - F-034
+  - F-035
+  recommendation: preferred
+  coverage:
+  - criterion_id: SC-001
+    assessment: partial
+    notes: Non-destructive reconciliation and verified copies are proposed, not demonstrated.
+  - criterion_id: SC-002
+    assessment: unknown
+    notes: Cloud cleanup is unresolved; local ingestion alone does not release quota.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Year organization and two independent restorable drives need a trial.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Automated intake and operations require a family usability trial.
+  - criterion_id: SC-005
+    assessment: unknown
+    notes: Savings depend on cloud cleanup and actual costs.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: No complete family workflow demonstrated.
+  feasibility: conditional
+  recurring_effort:
+    value: Not measured; depends on intake and cleanup workflow
+    basis: estimated
+  complexity: high
+  rejection_reason: null
+- id: ALT-009
+  approach: reuse
+  description: Keep Google Photos as the capture and browsing service; consolidate payments through an
+    eligible family plan if suitable. Separately export and reconcile old drives into two checked year-organized
+    archives, periodically repeat exports and verify restoration. Buy capacity as needed rather than relying
+    on unproven deletion automation.
+  candidate_ids:
+  - C-002
+  - C-003
+  - C-001
+  strengths:
+  - Simpler capture path avoids fragile cloud deletion and keeps existing familiar apps.
+  tradeoffs:
+  - Requires recurring cloud capacity and an operator for exports and reconciliation; family-plan eligibility
+    and long-term burden are unknown.
+  effort:
+    value: Initial reconciliation and account export are substantial; unmeasured
+    basis: estimated
+  cost:
+    value: Existing PC and drives assumed; capacity and any subscription or software costs unknown
+    basis: estimated
+  evidence_ids:
+  - F-001
+  - F-002
+  - F-004
+  - F-005
+  - F-007
+  recommendation: uncertain
+  coverage:
+  - criterion_id: SC-001
+    assessment: partial
+    notes: Archive recovery and reconciliation not proven.
+  - criterion_id: SC-002
+    assessment: partial
+    notes: Capacity can accommodate growth only if plan and account eligibility fit; continuing cost.
+  - criterion_id: SC-003
+    assessment: unknown
+    notes: Year layout and independent restore need validation.
+  - criterion_id: SC-004
+    assessment: unknown
+    notes: Periodic exports and drive maintenance may remain cumbersome.
+  - criterion_id: SC-005
+    assessment: partial
+    notes: One shared payment may reduce hassle but does not eliminate subscription costs.
+  - criterion_id: SC-006
+    assessment: unknown
+    notes: Capture is familiar; archive maintenance usability is untested.
+  feasibility: conditional
+  recurring_effort:
+    value: Not measured; depends on intake and cleanup workflow
+    basis: estimated
+  complexity: high
+  rejection_reason: null
+unknowns:
+- id: U-001
+  category: known_unknown
+  question: What are the capacities, free space, health, and unique contents of both drives and each account?
+  significance: Determines safe staging, cost, and whether either drive needs replacement.
+  verification_step: Non-destructively inventory drives and account storage, check health, and size temporary
+    space.
+  status: open
+- id: U-002
+  category: known_unknown
+  question: Can a representative export and reconciliation preserve originals, capture dates and sidecars,
+    and identify conflicts across paths?
+  significance: Required before choosing a dependable workflow or deleting cloud files.
+  verification_step: Run a small non-destructive trial with copies, including videos, edits, renamed duplicates
+    and date anomalies.
+  status: open
+- id: U-003
+  category: potential_unknown_unknown
+  question: Are there unsupported, missing or corrupted files, edited versions, or account restrictions?
+  significance: An apparently successful copy could omit irreplaceable content.
+  verification_step: Review export logs, exceptions, file counts and representative restores, including
+    the child account.
+  status: open
+- id: U-004
+  category: known_unknown
+  question: Can an appliance safely import and reconcile both old drives and three Google accounts, provide
+    usable independent backups, and be operated by a nontechnical relative?
+  significance: Determines whether a ready-made product achieves the complete outcome.
+  verification_step: Check product documentation and pricing, then trial representative imports, duplicate
+    cases, restore, scheduled backup, cloud deletion and onboarding with a nontechnical person.
+  status: open
+- id: U-005
+  category: known_unknown
+  question: Can a browser extension or native Undo device backup remove the intended cloud items safely
+    without deleting unarchived items or causing device or partner re-uploads?
+  significance: Native removal only covers items currently on a device; third-party UI automation cannot
+    use a supported API or currently match Takeout files to the cloud library.
+  verification_step: Inventory which cloud items are present on each device. Inspect extension source
+    and permissions, then in one account run a dry-run/limited reversible batch only after two archive
+    copies are verified; test device backup and partner-sharing effects.
+  status: open
+- id: U-006
+  category: known_unknown
+  question: Is Google Quick Share automatic Android-to-Windows photo/video backup available on the family's
+    devices, and does it provide complete, repeatable copies with the original files intact?
+  significance: Could offer the lowest-effort local PC ingest path, but a silent omission or altered copy
+    would violate preservation needs.
+  verification_step: Check for the feature on each relevant phone and Windows PC, then trial with representative
+    photos/videos, compare counts and file hashes after transfer, and confirm behavior on a second connection.
+  status: open
+- id: U-007
+  category: known_unknown
+  question: For media with and without available sidecars, can records across exports and devices be matched
+    unambiguously to archived originals and cloud items?
+  significance: If the sidecar URL and local identity chain is complete, Playwright could target specific
+    cloud items without enumerating the library; gaps or ambiguous mappings would block safe deletion.
+  verification_step: Inspect a small representative sample including camera and WhatsApp media, photos
+    and videos, duplicates and edits; inventory sidecars and URLs, test signed-in links and compare independent
+    content evidence. Check whether other relevant account exports or device copies supply missing records;
+    record unmatched items without inferring identity.
+  status: open
+risks:
+- id: R-001
+  description: Mirror or deletion propagates loss from an incomplete or divergent source.
+  impact: high
+  likelihood: unknown
+  evidence_ids:
+  - F-001
+  - F-003
+  mitigation_question: Can independent copies and restore checks be established before synchronization
+    or deletion?
+- id: R-002
+  description: Missing metadata or duplicate assumptions misclassify dates or distinct edits.
+  impact: high
+  likelihood: unknown
+  evidence_ids:
+  - F-002
+  - F-005
+  mitigation_question: Can representative files and sidecars be checked before deduplication?
+decisions:
+- id: D-001
+  topic: Photo organization
+  decision: Use PhotoPrism Community Edition as the current candidate for organizing media, subject to
+    further investigation.
+  confirmed_by_user: true
+- id: D-002
+  topic: Google data export
+  decision: Use Google Takeout as the primary export choice.
+  confirmed_by_user: true
+- id: D-003
+  topic: Archive synchronization and repair
+  decision: User proposes custom Python scripts to distribute an outbox to both target drives and repair
+    and organize the existing archive by year/month or year.
+  confirmed_by_user: true
+- id: D-004
+  topic: Appliance option
+  decision: Reject Synology BeeStation because its high price bundles hardware into the sale package.
+  confirmed_by_user: true
+- id: D-005
+  topic: Google Photos bulk removal
+  decision: Reject native Undo device backup, manual web range selection and third-party browser-extension
+    deletion as cumbersome or unfeasible for the family's workflow.
+  confirmed_by_user: true
+- id: D-006
+  topic: Media fidelity
+  decision: Reject Google Photos Recover storage and Storage saver because they may alter original media
+    and the user will not accept the risk of unintended data corruption.
+  confirmed_by_user: true
+- id: D-007
+  topic: Windows phone access API
+  decision: Use Microsoft's official Windows Portable Devices (WPD) API for application-level Android
+    MTP access; a C# probe enumerated the S25 and successfully deleted one explicitly matched test photo.
+  confirmed_by_user: true
+open_questions:
+- id: Q-001
+  question: Would the family prefer continued shared cloud payments for convenience, or prioritize reducing
+    subscriptions even with more manual work?
+  owner: user
+  blocking: false
+- id: Q-002
+  question: How should Takeout downloads, extraction, PhotoPrism import and verification be made repeatable
+    for three accounts?
+  owner: discovery
+  blocking: false
+- id: Q-003
+  question: How can exported items be matched and removed from Google Photos and Drive after verification
+    without excessive manual labor?
+  owner: discovery
+  blocking: false
+- id: Q-004
+  question: 'What should happen to new phone photos after initial migration: upload directly or continue
+    Google backup and periodic Takeout?'
+  owner: user
+  blocking: false
+- id: Q-005
+  question: What sources of trustworthy dates and metadata exist in the old drives and Takeout sidecars,
+    and how should ambiguous or conflicting dates be handled?
+  owner: discovery
+  blocking: false
+- id: Q-006
+  question: How should the outbox script handle disconnected drives, conflicts, partial transfers, verification
+    and retention until both targets succeed?
+  owner: discovery
+  blocking: false
+- id: Q-007
+  question: Can a low-effort phone-to-PC copy workflow safely meet ongoing capture needs, and is preventing
+    future cloud growth useful if existing Google Photos usage remains?
+  owner: discovery
+  blocking: true
+- id: Q-008
+  question: What is the tested scope of each family member's phone-resident media, and would leaving Photos
+    backup off after native removal be acceptable for ongoing capture?
+  owner: user
+  blocking: false
+- id: Q-009
+  question: Is a wired USB-C connection required, or is automatic local transfer over Quick Share acceptable
+    if it proves reliable?
+  owner: user
+  blocking: false
+- id: Q-010
+  question: Do Takeout sidecar URLs provide stable cloud item IDs, and can a durable hash/thumbnail mapping
+    safely connect those items to archive and phone files for Playwright cleanup?
+  owner: discovery
+  blocking: false
+hypotheses:
+- id: H-001
+  statement: Existing export and folder comparison capabilities can form a safe archive workflow.
+  decision_impact: If a representative trial fails, consider a different tool or custom gap rather than
+    assuming reuse suffices.
+  verification_method: Inspect official documentation then perform a non-destructive representative trial.
+    Falsify on missing files, unsafe conflicts or unmanageable effort.
+  status: inconclusive
+  evidence_ids:
+  - F-002
+  - F-005
+- id: H-002
+  statement: A shared Google One plan can reduce payment administration.
+  decision_impact: May favor paying for capacity during archive work.
+  verification_method: Check official family-sharing eligibility and compare actual account usage and
+    local prices. Falsify if ineligible or capacity is uneconomic.
+  status: inconclusive
+  evidence_ids:
+  - F-004
+- id: H-003
+  statement: A browser extension can reduce bulk-deletion effort while safely restricting deletion to
+    items already verified in both archive copies.
+  decision_impact: If it cannot target and confirm archived items, it is unsuitable for archive-driven
+    cleanup despite automating broad deletion.
+  verification_method: Inspect source and permissions; test whether a reproducible mapping from Takeout
+    files to selected Photos items exists, then trial only on a small account range after verified duplicate
+    archive copies exist.
+  status: inconclusive
+  evidence_ids:
+  - F-009
+  - F-015
+research_control:
+  budget: Focused validation of the proposed identity chain; do not proceed to any destructive browser
+    trial unless representative exports show complete URLs and deterministic matches to verified copies.
+  next_question: Across a small camera and WhatsApp photo/video sample, which files have sidecars or URLs,
+    and can missing records be matched safely to other device copies or relevant account exports?
+  decision_impact: Determines whether the workflow can handle both metadata-rich and metadata-poor media,
+    and which items must remain unmatched and ineligible for automatic cleanup.
+  continuation_reason: A small existing export can test the critical identity assumption without broad
+    research.
+  stop_rationale: Stop broad research; test the identity bottleneck with a representative read-only sample.
+synthesis:
+  conclusion: proceed_to_shape
+  recommended_direction: 'Conditional leader: ALT-008, an existing-tool-first local archive with verified
+    two-copy preservation and separately validated low-effort intake and cloud cleanup. ALT-009 is the
+    simpler fallback if ongoing paid capacity is acceptable; neither is demonstrated end to end.'
+  rationale: 'ALT-008 addresses the desired long-term reduction in storage pressure without assuming a
+    single API solves the lifecycle. It remains conditional: no acceptable cloud cleanup or family-usable
+    intake has been proven. ALT-009 has fewer fragile moving parts but retains payments and recurring
+    export work. The Takeout-to-Playwright identity chain is one hypothesis, not an established solution
+    or a prerequisite for all alternatives.'
+  critical_unknown_ids:
+  - U-001
+  - U-002
+  - U-003
+  - U-004
+  - U-006
+  - U-007
+  shape_considerations:
+  - Agree on subscription tradeoff and desired operating burden.
+  - Establish independent copies and restoration checks before any cleanup.
+  strategic_direction: integrate
+  confidence: low
+  stop_rationale: Existing evidence is sufficient to compare conditional workflows; further broad candidate
+    research has low value until a small representative export tests the identity bottleneck. User explicitly
+    requested proceeding to Shape with unknowns; feasibility questions remain unresolved and must not
+    be represented as proven.
+  end_to_end:
+    capabilities:
+    - 'Essential: preserve and reconcile both unique drive inventories; obtain account originals and metadata;
+      organize by year; verify two independent recoverable copies; ingest future media; control cloud
+      growth; provide a repeatable family-usable routine. Dependencies: verified copies precede cleanup;
+      reliable intake and account settings precede disabling cloud backup. Optional: searchable photo
+      catalog and automated exact-item cleanup.'
+    - 'Essential: handle media with metadata and media without sidecars or reliable dates; preserve original
+      bytes and record uncertain provenance, dates and matches rather than silently dropping or guessing
+      them.'
+    gap_analysis:
+    - 'Cloud API limitations do not prove all cleanup impossible: supported native and extension approaches
+      were rejected by the user; exact-item web automation via Takeout URLs is a hypothesis, with identity
+      and UI behavior unverified (F-009, F-016, F-034, F-035). Retaining paid cloud capacity avoids deletion
+      but changes the cost tradeoff.'
+    - WPD succeeded for one device deletion after Shell attempts failed (F-029–F-033); it neither verifies
+      transferred bytes nor removes cloud content. Quick Share availability and complete intake remain
+      unknown (F-020–F-022).
+    - Neither drive health, capacity, reconciliation, independent restores, metadata dates, all accounts,
+      nor family usability is established. Avoid destructive cleanup until those links are demonstrated.
+    - A user-supplied sidecar contains an item URL (F-036). The user reports some media, often WhatsApp
+      downloads, has no metadata; whether other device or account exports fill gaps is a hypothesis. Preserve
+      unmatched items and treat inferred dates and identity as unverified; do not automatically delete
+      cloud items without an unambiguous match.
+    recommendation: Trial a representative read-only sample of camera and WhatsApp photos and videos across
+      available accounts and devices. Preserve unmatched originals, flag uncertain dates and matches,
+      and test any recovered URL under the correct account. A match must be supported by evidence; unresolved
+      items require review, not automated cleanup.
+checkpoint:
+  phase: completed
+  completed_phases:
+  - problem_validation
+  - system_mapping
+  - solution_strategies
+  - prior_art
+  - feasibility
+  - critical_validation
+  - synthesis
+  status: ready_with_unknowns
+  reviewed_by_user: true
+  research_mode: online_verified
+created: '2026-11-08'
+updated: '2026-11-12'

@@ -1,0 +1,67 @@
+schema_version: 1
+project: Family Media Archive
+source:
+  path: context/foundation/prd.yaml
+  version: 1
+strategy:
+  priority: early_validation
+  principle: vertical_first
+milestone:
+  id: M-01
+  title: First verified local archive
+  status: active
+  outcome: The operator can safely integrate and revisit a Takeout batch in one verified local archive.
+  done_when:
+    - Batch media are organized by year, content verified, and available for browsing.
+    - Catalog information and distinct source provenance survive restart, and repeating or resuming the batch preserves results without duplicate media.
+    - Source media remain intact when extraction or verification fails.
+  foundations: []
+  slices:
+    - id: S-01
+      title: Inspect a Takeout batch
+      change_id: s01-inspect-takeout-batch
+      outcome: The operator can extract a Takeout batch and inspect its recognized media and preparation information.
+      done_when:
+        - Extraction preserves the source hierarchy and reports failures without removing source media.
+        - Each recognized item shows available metadata, explicit unknowns, intended archive location and processing timestamps.
+      refs: [FR-001, FR-002, US-01]
+      depends_on: []
+      status: proposed
+    - id: S-02
+      title: Browse a verified archive
+      change_id: s02-browse-verified-archive
+      outcome: The operator can archive batch media, verify their content, and browse them by year after a restart.
+      done_when:
+        - Archived content is hash verified and verification failures are reported while source media remain intact.
+        - The local file-based catalog retains available original metadata and specified media attributes, marking unavailable values unknown, across restarts.
+        - Archived photos and videos can be browsed in year-based folders.
+      refs: [FR-003, FR-010, FR-011, FR-014, US-01, US-02, NFR-001, NFR-002]
+      depends_on: [S-01]
+      status: proposed
+    - id: S-03
+      title: Integrate duplicate media
+      change_id: s03-integrate-duplicates
+      outcome: The operator can integrate duplicate media without another archive copy or loss of distinct source information.
+      done_when:
+        - Duplicate content is associated with verified archived content without creating another media file.
+        - Distinct available source metadata and provenance remain associated with their sources in the catalog.
+      refs: [FR-003, FR-010, US-01, US-02]
+      depends_on: [S-02]
+      status: proposed
+    - id: S-04
+      title: Resume and repeat safely
+      change_id: s04-resume-repeat-safely
+      outcome: The operator can correct a problem and resume or repeat a batch without losing completed archive results.
+      done_when:
+        - Extraction and archive interruptions can be resumed after correction without restarting the whole batch.
+        - Repeated and resumed processing preserves completed results and does not duplicate or corrupt archived media or catalog information.
+      refs: [FR-008, FR-013, US-01, US-02, NFR-003]
+      depends_on: [S-03]
+      status: proposed
+  risks:
+    - id: R-01
+      description: The PRD does not specify a measurable threshold for a lightweight catalog.
+      affects: [S-02]
+      blocking: false
+      status: open
+history: []
