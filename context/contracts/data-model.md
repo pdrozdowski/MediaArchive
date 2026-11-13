@@ -25,3 +25,10 @@ The archive year comes first from `photoTakenTime.timestamp` when it is a valid,
 ## Diagnostics and preservation
 
 Staging failures and inspection diagnostics identify the input and, where available, the relative path. Diagnostics cover unresolved or malformed metadata, unusable dates, unsupported files, and intended-path collisions. A batch with any failed input is incomplete even when other inputs staged successfully. Preparation is read-only with respect to source media and the prospective archive.
+
+
+## Verified archive and catalog
+
+The archive command copies recognized staged media to `<archive-root>/<year-or-Unknown>/<original filename>` without overwriting existing files. It hashes the staged source and destination independently with SHA-256; only equal hashes are reported as verified. Failed or colliding copies are reported and the original and staged source files remain intact. A partial destination may remain after an interrupted copy and is never assumed verified.
+
+The versioned JSON catalog is stored at `<archive-root>/media-archive.catalog.json`. Each entry retains source identity and relative path, filename, media kind, year, archive path, the full associated sidecar object when available, preparation and archive timestamps, file size, SHA-256, media attributes, and explicit unknown field names. `ffprobe` supplies width, height, video duration and frame rate when available; unavailable, malformed, or unsupported values remain unknown and produce a warning. Photos have unknown duration and frame rate. Catalog updates preserve previous entries and publish a complete temporary JSON file; malformed existing catalogs fail closed. A catalog write failure is reported, leaves the previous catalog intact, and identifies verified media that could not be cataloged. Catalog records can be read after restart independently of staging data.

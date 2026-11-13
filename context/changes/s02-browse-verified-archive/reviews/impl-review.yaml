@@ -1,0 +1,183 @@
+schema_version: 1
+change_id: s02-browse-verified-archive
+plan_path: context/changes/s02-browse-verified-archive/plan.yaml
+plan_digest: a2427a40c38bbd6e50518fce957571a22bfe2331bcd3b36c4e14797997e5e927
+scope:
+  tasks:
+  - T-01
+  - T-02
+  - T-03
+  - T-04
+  git_baseline: 8762f7cc4f19e757e64128e3f7169efc23aa4545
+  git_head: 8762f7cc4f19e757e64128e3f7169efc23aa4545
+  reviewed_paths:
+  - src/MediaArchive.Core/ArchiveCopier.cs
+  - src/MediaArchive.Core/ArchiveCatalog.cs
+  - src/MediaArchive.Core/ArchiveCatalogIntegrator.cs
+  - src/MediaArchive.Core/MediaProbe.cs
+  - src/MediaArchive.CLI/Program.cs
+  - tests/MediaArchive.Tests/ArchiveCatalogTests.cs
+  - tests/MediaArchive.Tests/CliInspectionTests.cs
+  - context/contracts/cli-interface.md
+  - context/contracts/data-model.md
+verdict: needs_attention
+review_round: 3
+reviewers:
+  acceptance: completed
+  engineering: completed
+checks:
+- command: .\scripts\test.ps1
+  result: passed
+  evidence: Exit 0; build succeeded, 35 tests passed.
+- command: ffprobe availability
+  result: not_run
+  evidence: ffprobe not found on PATH; real-media verification unavailable.
+- command: .\scripts\test.ps1 (after corrections)
+  result: passed
+  evidence: Exit 0; build succeeded, 42 passed, 1 skipped. Real ffprobe/ffmpeg test
+    skipped due to absent executables.
+- command: .\scripts\test.ps1 (final)
+  result: passed
+  evidence: Exit 0; build succeeded, 42 passed and 1 skipped; mandatory real-media
+    test not run because ffprobe and ffmpeg unavailable.
+dimensions:
+  plan_adherence: warning
+  scope_discipline: warning
+  safety_quality: warning
+  architecture: warning
+  pattern_consistency: warning
+  success_criteria: warning
+findings:
+- id: F-01
+  severity: medium
+  impact: low
+  dimension: safety_quality
+  target: src/MediaArchive.Core/ArchiveCatalog.cs:18
+  source_ref: plan.design.failure_semantics
+  evidence: Null catalog items pass validation and can crash browse.
+  reproduction: Read schema 1 catalog with Items containing null.
+  recommended_fix: Reject malformed entries before use.
+  status: verified
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  verification: Regression tests passed in full suite and fresh independent reviewer
+    checked relevant correction; restart test uses synthetic probe values.
+- id: F-02
+  severity: medium
+  impact: low
+  dimension: safety_quality
+  target: src/MediaArchive.Core/ArchiveCatalogIntegrator.cs:20
+  source_ref: plan.design.failure_semantics
+  evidence: Catalog read failure does not identify already verified uncataloged copies.
+  reproduction: Integrate verified copies with malformed catalog.
+  recommended_fix: Report each uncataloged archive path.
+  status: verified
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  verification: Regression tests passed in full suite and fresh independent reviewer
+    checked relevant correction; restart test uses synthetic probe values.
+- id: F-03
+  severity: medium
+  impact: low
+  dimension: safety_quality
+  target: src/MediaArchive.Core/ArchiveCopier.cs:78
+  source_ref: plan.design.failure_semantics
+  evidence: Copy failure diagnostics need not identify partial destination.
+  reproduction: A copy error after destination creation can omit its path.
+  recommended_fix: Include destination path in diagnostic.
+  status: verified
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  verification: Regression tests passed in full suite and fresh independent reviewer
+    checked relevant correction; restart test uses synthetic probe values.
+- id: F-04
+  severity: medium
+  impact: low
+  dimension: success_criteria
+  target: tests/MediaArchive.Tests/ArchiveCatalogTests.cs:34
+  source_ref: plan.tasks.T-03.done_when[3]
+  evidence: A real photo/video archive and restart test now exists and has been independently
+    inspected, but was skipped because ffprobe and ffmpeg are absent; its execution
+    and fixture portability remain unverified.
+  reproduction: 'Inspect real probe process fixture: media consists of three bytes
+    and probe is PowerShell.'
+  recommended_fix: Add real-media ffprobe tests.
+  status: blocked
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  - 3
+  verification: null
+- id: F-05
+  severity: medium
+  impact: low
+  dimension: success_criteria
+  target: tests/MediaArchive.Tests/CliInspectionTests.cs:95
+  source_ref: plan.tasks.T-04.done_when[2]
+  evidence: Fresh browse process assertions do not check all records and required
+    fields via helper.
+  reproduction: Inspect assertions after staging deletion.
+  recommended_fix: Add specified fresh-process Core reader and full assertions.
+  status: verified
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  verification: Regression tests passed in full suite and fresh independent reviewer
+    checked relevant correction; restart test uses synthetic probe values.
+- id: F-06
+  severity: medium
+  impact: low
+  dimension: success_criteria
+  target: tests/MediaArchive.Tests/CliInspectionTests.cs
+  source_ref: plan.verification.V-01
+  evidence: No injected hash mismatch, copy and read failure tests found.
+  reproduction: Search test suite for these scenarios.
+  recommended_fix: Add meaningful failure injection tests and source preservation
+    assertions.
+  status: verified
+  rounds_seen:
+  - 0
+  - 1
+  - 2
+  verification: Regression tests passed in full suite and fresh independent reviewer
+    checked relevant correction; restart test uses synthetic probe values.
+summary: 'Needs attention: real ffprobe media verification and persistence across
+  restart remain unverified; ffprobe and ffmpeg are unavailable. No commits: implementation
+  files were pre-existing uncommitted work and cannot be safely isolated for staging.
+  User requested closure on 2026-11-13, accepting the outstanding real-media verification
+  gap.'
+history:
+- round: 0
+  outcome: Independent auditors identified six findings; previous completed review
+    retained in history.
+  checks:
+  - .\scripts\test.ps1
+  commits: []
+- round: 1
+  outcome: Coding corrections and tests; independent re-audit identified uncaught
+    InvalidDataException and incomplete restart coverage.
+  checks:
+  - .\scripts\test.ps1
+  commits: []
+- round: 2
+  outcome: Corrected exception handling and expanded restart test; independent reviewer
+    confirmed corrections and remaining real-media gap.
+  checks:
+  - .\scripts\test.ps1
+  commits: []
+- round: 3
+  outcome: Expanded real-media test through archive and fresh-process reload; independent
+    reviewer confirmed structure. Execution remains blocked by missing tools.
+  checks:
+  - .\scripts\test.ps1
+  commits: []
+user_decision: accepted_with_outstanding_issues
+accepted_on: '2026-11-13'

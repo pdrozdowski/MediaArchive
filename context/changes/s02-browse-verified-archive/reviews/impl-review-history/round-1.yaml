@@ -1,0 +1,90 @@
+﻿schema_version: 1
+change_id: s02-browse-verified-archive
+plan_path: context/changes/s02-browse-verified-archive/plan.yaml
+plan_digest: a2427a40c38bbd6e50518fce957571a22bfe2331bcd3b36c4e14797997e5e927
+scope:
+  tasks: [T-01, T-02, T-03, T-04]
+  git_baseline: 8762f7cc4f19e757e64128e3f7169efc23aa4545
+  git_head: 8762f7cc4f19e757e64128e3f7169efc23aa4545
+  reviewed_paths:
+    - src/MediaArchive.Core/ArchiveCopier.cs
+    - src/MediaArchive.Core/ArchiveCatalog.cs
+    - src/MediaArchive.Core/ArchiveCatalogIntegrator.cs
+    - src/MediaArchive.Core/MediaProbe.cs
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/ArchiveCatalogTests.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    - context/contracts/cli-interface.md
+    - context/contracts/data-model.md
+verdict: approved
+review_round: 1
+reviewers:
+  acceptance: completed
+  engineering: completed
+checks:
+  - command: .\scripts\test.ps1
+    result: passed
+    evidence: Build succeeded with 0 warnings and errors; all 35 tests passed, exit code 0.
+  - command: python -m unittest discover -s .agents/skills/20x-implement/tests -v
+    result: passed
+    evidence: All 19 implementation skill tests passed.
+  - command: python .agents/skills/20x-implement/scripts/validate_execution.py context/changes/s02-browse-verified-archive/plan.yaml --roadmap context/foundation/roadmap.yaml
+    result: passed
+    evidence: Execution progress structurally consistent.
+  - command: python .agents/skills/20x-plan/scripts/validate_plan.py context/changes/s02-browse-verified-archive/plan.yaml --roadmap context/foundation/roadmap.yaml
+    result: passed
+    evidence: Plan valid and roadmap aligned.
+dimensions:
+  plan_adherence: pass
+  scope_discipline: pass
+  safety_quality: pass
+  architecture: pass
+  pattern_consistency: pass
+  success_criteria: pass
+findings:
+  - id: F-01
+    severity: medium
+    impact: low
+    dimension: success_criteria
+    target: tests/MediaArchive.Tests/ArchiveCatalogTests.cs:8
+    source_ref: plan.tasks.T-03.done_when[3]
+    evidence: Initial test injected hard-coded JSON into the parser and did not prove actual ffprobe process invocation or known attributes after restart.
+    reproduction: Initial review compared ProbeParsesKnownVideoAttributesFromFfprobeJson with the separate-process browse test; neither exercised process invocation and persisted known values together.
+    recommended_fix: Exercise an actual fake ffprobe process, persist known values, then assert those values from a fresh browse process.
+    status: verified
+    rounds_seen: [0, 1]
+    verification: Fixed in round 1. The real-process test validates argument positions, persists width/height/duration/frame rate, and checks values from a separate dotnet browse process; fresh acceptance auditor confirmed.
+  - id: F-02
+    severity: medium
+    impact: low
+    dimension: safety_quality
+    target: src/MediaArchive.Core/MediaProbe.cs:44
+    source_ref: plan.design.failure_semantics[ffprobe unavailable or failure]
+    evidence: Initial implementation read redirected stdout to completion before draining stderr, allowing a child process to block when the stderr pipe filled.
+    reproduction: Engineering auditor identified a fake process that writes beyond pipe capacity to stderr before closing stdout; sequential reads can hang.
+    recommended_fix: Drain stdout and stderr concurrently and impose a bounded process timeout that terminates the process tree.
+    status: verified
+    rounds_seen: [0, 1]
+    verification: Fixed in round 1. MediaProbe concurrently drains both streams and kills the process tree after 30 seconds; a regression test floods stderr and passes.
+  - id: F-03
+    severity: low
+    impact: low
+    dimension: safety_quality
+    target: tests/MediaArchive.Tests/CliInspectionTests.cs
+    source_ref: plan.tasks.T-01.done_when[1]
+    evidence: Initial acceptance tests did not exercise archive-root reparse rejection.
+    reproduction: Review found no symlink/reparse-specific archive test despite implemented rejection checks.
+    recommended_fix: Add an isolated symlink archive-root test asserting rejection and source preservation where the environment permits symlink creation.
+    status: verified
+    rounds_seen: [0, 1]
+    verification: Fixed in round 1. New test confirms symlink root is rejected and source bytes remain intact; it skips only when the OS cannot create the symlink.
+summary: All S-02 tasks were audited. Two independent reviewers found no remaining material acceptance or engineering gaps after focused fixes. The worktree contains unrelated and uncommitted changes, so no commit was created. The skill references references/review-contract.md, but that file is absent; the remaining review instructions and report schema were followed.
+history:
+  - round: 0
+    outcome: Initial independent acceptance and engineering reviews found two medium findings and one low coverage gap.
+    checks: [independent acceptance audit, independent engineering audit]
+    commits: []
+  - round: 1
+    outcome: Coding subagent addressed findings; two fresh independent reviewers verified fixes; full suite passed.
+    checks: [.\scripts\test.ps1, separate-process probe persistence test, stderr flood test, symlink root test]
+    commits: []

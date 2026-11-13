@@ -1,0 +1,170 @@
+schema_version: 1
+change_id: s02-browse-verified-archive
+review_round: 2
+plan_path: context/changes/s02-browse-verified-archive/plan.yaml
+plan_digest: a2427a40c38bbd6e50518fce957571a22bfe2331bcd3b36c4e14797997e5e927
+verdict: pass
+sources:
+  roadmap: context/foundation/roadmap.yaml
+  prd: context/foundation/prd.yaml
+  research: context/changes/s02-browse-verified-archive/research.yaml
+requirement_coverage:
+- ref: FR-003
+  assessment: covered
+  scoped_obligation: Archive and hash verify before any cleanup; duplicate integration
+    belongs to S-03.
+  tasks:
+  - T-01
+  - T-02
+  verification:
+  - V-01
+  evidence: roadmap.yaml S-02 and S-03; plan.yaml T-02 and failure_semantics
+- ref: FR-010
+  assessment: covered
+  scoped_obligation: Persist available metadata and identification information beyond
+    restart and staging cleanup; duplicate integration belongs to S-03.
+  tasks:
+  - T-03
+  - T-04
+  verification:
+  - V-02
+  evidence: prd.yaml FR-010; plan.yaml design Attribute capture and V-02; revised
+    plan Attribute capture and Fresh-process catalog read test
+- ref: FR-011
+  assessment: covered
+  scoped_obligation: Retain available specified media attributes and explicit unknowns.
+  tasks:
+  - T-03
+  verification:
+  - V-02
+  evidence: prd.yaml FR-011; plan.yaml design Attribute capture and T-03; revised
+    plan Attribute capture and Fresh-process catalog read test
+- ref: FR-014
+  assessment: covered
+  scoped_obligation: Organize photos and videos in year folders for browsing.
+  tasks:
+  - T-01
+  - T-04
+  verification:
+  - V-03
+  evidence: roadmap.yaml S-02; plan.yaml T-01 and V-03
+- ref: US-01
+  assessment: covered
+  scoped_obligation: For S-02, verify archived media, report failures and preserve
+    sources, with browsing by year; cleanup, reporting, duplicate integration and
+    full resume are other slices.
+  tasks:
+  - T-01
+  - T-02
+  - T-04
+  verification:
+  - V-01
+  - V-03
+  evidence: prd.yaml US-01; roadmap.yaml S-02 through S-04; plan.yaml T-02
+- ref: US-02
+  assessment: covered
+  scoped_obligation: Retain available metadata and attributes across restart and removal
+    of temporary data; duplicate integration and full resumption are later slices.
+  tasks:
+  - T-03
+  - T-04
+  verification:
+  - V-02
+  evidence: prd.yaml US-02; roadmap.yaml S-02 through S-04; plan.yaml V-02; revised
+    plan Attribute capture and Fresh-process catalog read test
+- ref: NFR-001
+  assessment: covered
+  scoped_obligation: Store catalog locally in files.
+  tasks:
+  - T-03
+  verification:
+  - V-02
+  evidence: prd.yaml NFR-001; plan.yaml catalog persistence
+- ref: NFR-002
+  assessment: covered
+  scoped_obligation: Catalog survives application restart and temporary batch cleanup.
+  tasks:
+  - T-03
+  - T-04
+  verification:
+  - V-02
+  evidence: prd.yaml NFR-002; plan.yaml V-02; revised plan Attribute capture and Fresh-process
+    catalog read test
+acceptance_checks:
+- task_id: T-01
+  criterion_index: 0
+  assessment: pass
+  given: Valid inputs or incomplete staging and archive arguments.
+  when: Run archive and inspect commands.
+  then: Archive reports incomplete staging without integration; inspect remains read-only.
+- task_id: T-01
+  criterion_index: 1
+  assessment: pass
+  given: Photo and video fixtures, including unknown year, unsafe roots and existing
+    target.
+  when: Archive the fixtures.
+  then: Files are copied into the appropriate folder, existing targets remain intact
+    and unsafe roots are rejected.
+- task_id: T-02
+  criterion_index: 0
+  assessment: pass
+  given: Media source and copied destination, including mismatch fixture.
+  when: Hash both streams.
+  then: Only equal SHA-256 hashes yield verified status.
+- task_id: T-02
+  criterion_index: 1
+  assessment: pass
+  given: Injected copy, read, mismatch or collision failure.
+  when: Run archive integration.
+  then: Failure identifies the item and leaves original and staged sources intact.
+- task_id: T-03
+  criterion_index: 0
+  assessment: pass
+  given: Verified media with available and unavailable metadata attributes.
+  when: Persist the item in the catalog.
+  then: Full sidecar, source and all specified attributes or explicit unknowns are
+    retained.
+- task_id: T-03
+  criterion_index: 1
+  assessment: pass
+  given: A prior catalog, an existing record, and malformed or unwritable catalog
+    cases.
+  when: Restart and read or attempt an update.
+  then: Existing records remain and failed writes do not claim success.
+- task_id: T-03
+  criterion_index: 2
+  assessment: pass
+  given: A verified file and a catalog write failure.
+  when: Attempt catalog publication.
+  then: Incomplete serialization is not published and the uncataloged verified file
+    is reported.
+- task_id: T-04
+  criterion_index: 0
+  assessment: pass
+  given: Representative batch and injected failures.
+  when: Run end-to-end and restart tests.
+  then: Known and unknown attributes, failures and preserved source files are asserted.
+- task_id: T-04
+  criterion_index: 1
+  assessment: pass
+  given: Implemented archive behavior and updated contracts.
+  when: Run solution build and tests.
+  then: Contracts describe behavior and the build and tests pass.
+- task_id: T-03
+  criterion_index: 3
+  assessment: pass
+  given: Known-dimension photo and video fixtures, plus malformed output and unavailable
+    executable cases.
+  when: Probe using the specified ffprobe JSON fields.
+  then: Catalog known dimensions, duration and frame rate; diagnostics and explicit
+    unknowns represent unavailable fields.
+- task_id: T-04
+  criterion_index: 2
+  assessment: pass
+  given: Persisted catalog after staging removal.
+  when: Launch a separate helper process calling the Core catalog reader.
+  then: Retained records and known and unknown attributes remain readable.
+findings: []
+summary: 'PASS: R-01 and R-02 were repaired by a concrete ffprobe extraction contract
+  and separate-process Core catalog reader test. No newly introduced or previously
+  missed blocking findings identified.'

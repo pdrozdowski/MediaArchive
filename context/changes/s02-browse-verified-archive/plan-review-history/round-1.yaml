@@ -1,0 +1,135 @@
+﻿schema_version: 1
+change_id: s02-browse-verified-archive
+review_round: 1
+plan_path: context/changes/s02-browse-verified-archive/plan.yaml
+plan_digest: 40d8cc9c6714ea5903297983356a128872146574db492be9320f4a27a60dfeb0
+verdict: changes_required
+sources:
+  roadmap: context/foundation/roadmap.yaml
+  prd: context/foundation/prd.yaml
+  research: context/changes/s02-browse-verified-archive/research.yaml
+requirement_coverage:
+  - ref: FR-003
+    assessment: covered
+    scoped_obligation: Archive and hash verify before any cleanup; duplicate integration belongs to S-03.
+    tasks: [T-01, T-02]
+    verification: [V-01]
+    evidence: roadmap.yaml S-02 and S-03; plan.yaml T-02 and failure_semantics
+  - ref: FR-010
+    assessment: partial
+    scoped_obligation: Persist available metadata and identification information beyond restart and staging cleanup; duplicate integration belongs to S-03.
+    tasks: [T-03, T-04]
+    verification: [V-02]
+    evidence: prd.yaml FR-010; plan.yaml design Attribute capture and V-02
+    gap: Plan does not identify a runnable catalog-read path for V-02 or a concrete means of obtaining available embedded media metadata.
+  - ref: FR-011
+    assessment: partial
+    scoped_obligation: Retain available specified media attributes and explicit unknowns.
+    tasks: [T-03]
+    verification: [V-02]
+    evidence: prd.yaml FR-011; plan.yaml design Attribute capture and T-03
+    gap: No implementable extraction route or defined known-value fixture is specified for dimensions, duration and frame rate.
+  - ref: FR-014
+    assessment: covered
+    scoped_obligation: Organize photos and videos in year folders for browsing.
+    tasks: [T-01, T-04]
+    verification: [V-03]
+    evidence: roadmap.yaml S-02; plan.yaml T-01 and V-03
+  - ref: US-01
+    assessment: covered
+    scoped_obligation: For S-02, verify archived media, report failures and preserve sources, with browsing by year; cleanup, reporting, duplicate integration and full resume are other slices.
+    tasks: [T-01, T-02, T-04]
+    verification: [V-01, V-03]
+    evidence: prd.yaml US-01; roadmap.yaml S-02 through S-04; plan.yaml T-02
+  - ref: US-02
+    assessment: partial
+    scoped_obligation: Retain available metadata and attributes across restart and removal of temporary data; duplicate integration and full resumption are later slices.
+    tasks: [T-03, T-04]
+    verification: [V-02]
+    evidence: prd.yaml US-02; roadmap.yaml S-02 through S-04; plan.yaml V-02
+    gap: V-02 requires a fresh process to read the catalog but the plan defines no way to invoke such a read without staging a new batch.
+  - ref: NFR-001
+    assessment: covered
+    scoped_obligation: Store catalog locally in files.
+    tasks: [T-03]
+    verification: [V-02]
+    evidence: prd.yaml NFR-001; plan.yaml catalog persistence
+  - ref: NFR-002
+    assessment: partial
+    scoped_obligation: Catalog survives application restart and temporary batch cleanup.
+    tasks: [T-03, T-04]
+    verification: [V-02]
+    evidence: prd.yaml NFR-002; plan.yaml V-02
+    gap: Fresh-process catalog read is not defined in an executable interface.
+acceptance_checks:
+  - task_id: T-01
+    criterion_index: 0
+    assessment: pass
+    given: Valid inputs or incomplete staging and archive arguments.
+    when: Run archive and inspect commands.
+    then: Archive reports incomplete staging without integration; inspect remains read-only.
+  - task_id: T-01
+    criterion_index: 1
+    assessment: pass
+    given: Photo and video fixtures, including unknown year, unsafe roots and existing target.
+    when: Archive the fixtures.
+    then: Files are copied into the appropriate folder, existing targets remain intact and unsafe roots are rejected.
+  - task_id: T-02
+    criterion_index: 0
+    assessment: pass
+    given: Media source and copied destination, including mismatch fixture.
+    when: Hash both streams.
+    then: Only equal SHA-256 hashes yield verified status.
+  - task_id: T-02
+    criterion_index: 1
+    assessment: pass
+    given: Injected copy, read, mismatch or collision failure.
+    when: Run archive integration.
+    then: Failure identifies the item and leaves original and staged sources intact.
+  - task_id: T-03
+    criterion_index: 0
+    assessment: partial
+    given: Verified media with available and unavailable metadata attributes.
+    when: Persist the item in the catalog.
+    then: Full sidecar, source and all specified attributes or explicit unknowns are retained.
+    gap: The plan does not define how known dimensions, duration and frame rate are obtained or tested.
+  - task_id: T-03
+    criterion_index: 1
+    assessment: partial
+    given: A prior catalog, an existing record, and malformed or unwritable catalog cases.
+    when: Restart and read or attempt an update.
+    then: Existing records remain and failed writes do not claim success.
+    gap: The proposed command only creates a new staging batch and no catalog-read operation is described.
+  - task_id: T-03
+    criterion_index: 2
+    assessment: pass
+    given: A verified file and a catalog write failure.
+    when: Attempt catalog publication.
+    then: Incomplete serialization is not published and the uncataloged verified file is reported.
+  - task_id: T-04
+    criterion_index: 0
+    assessment: partial
+    given: Representative batch and injected failures.
+    when: Run end-to-end and restart tests.
+    then: Known and unknown attributes, failures and preserved source files are asserted.
+    gap: V-02 has no defined fresh-process read interface or concrete known-value media attribute fixture.
+  - task_id: T-04
+    criterion_index: 1
+    assessment: pass
+    given: Implemented archive behavior and updated contracts.
+    when: Run solution build and tests.
+    then: Contracts describe behavior and the build and tests pass.
+findings:
+  - id: R-01
+    severity: major
+    target: design.contracts Attribute capture; tasks.T-03.done_when[0]; verification.V-02
+    issue: The plan says attributes are retained when reliably obtainable but chooses no extraction mechanism, supported values or known-value fixture. S-01 provides none of dimensions, duration or frame rate, so an implementation can mark every such value unknown even for media with accessible metadata, leaving FR-011 and the S-02 available-attributes criterion unverifiable.
+    required_fix: Specify an evidence-backed minimal route for obtaining available attributes, the format or source coverage and explicit unavailable rules, and tests with known dimensions and video attributes plus unknown cases; if the necessary evidence is unavailable, resolve it or keep the plan draft.
+    evidence: research.yaml F-02 and open_questions; BatchInspector.cs InspectedMediaItem; prd.yaml FR-011; plan.yaml design Attribute capture
+  - id: R-02
+    severity: major
+    target: design.components Archive CLI command; verification.V-02
+    issue: V-02 requires a fresh process that reads the catalog after staging removal, but the sole proposed command requires fresh input and a new staging directory and no catalog read entry point or independent read test is specified. The advertised restart check cannot be executed as described.
+    required_fix: Specify a concrete executable fresh-process catalog read path or test harness and the exact assertions after staging removal, without requiring a new archive batch or expanding product scope.
+    evidence: plan.yaml design.components, CLI to Core contract and V-02; prd.yaml NFR-002 and US-02
+summary: Two new major findings block approval; attribute extraction and the fresh-process persistence check lack executable HOW. Duplicate integration and automatic resumption remain correctly deferred to later slices.

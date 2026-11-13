@@ -1,0 +1,98 @@
+﻿schema_version: 1
+change_id: s02-browse-verified-archive
+status: complete
+source:
+  roadmap: context/foundation/roadmap.yaml
+  item_id: S-02
+  prd: context/foundation/prd.yaml
+  refs: [FR-003, FR-010, FR-011, FR-014, US-01, US-02, NFR-001, NFR-002]
+questions:
+  - id: Q-01
+    question: What existing data and platform facilities can support verified archive copies and a persistent catalog?
+    why: Planning must preserve available metadata and detect failed copies without treating a preview as an archived result.
+    status: answered
+findings:
+  - id: F-01
+    question_id: Q-01
+    statement: Inspection supplies input and relative paths, media kind, full unambiguous sidecar JSON, unknowns, selected year, intended path, preparation time and collision flag; it does not persist or copy archive media.
+    confidence: verified
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/BatchInspector.cs InspectedMediaItem and BatchInspector.Inspect
+        note: Inspected records, sidecar cloning, year selection and path collision detection.
+      - kind: documentation
+        reference: context/contracts/data-model.md Inspected media item and Sidecar association and dates
+        note: Defines prospective paths and explicit Unknown year; filesystem timestamps are not used to select year.
+  - id: F-02
+    question_id: Q-01
+    statement: The inspected model does not supply dimensions, video duration, frames per second, file size or SHA256; planning must obtain available values or explicitly record unknowns as required.
+    confidence: verified
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/BatchInspector.cs InspectedMediaItem
+        note: Checked record fields; no media probing is represented in this record.
+      - kind: documentation
+        reference: context/foundation/prd.yaml FR-011
+        note: Lists required catalog attributes and unknown handling.
+  - id: F-03
+    question_id: Q-01
+    statement: .NET provides stream-based SHA-256 hashing, and a copy can leave a partial destination on interruption; comparing source and destination hashes is needed to establish the requested verification, while keeping source media intact on failure.
+    confidence: supported
+    evidence:
+      - kind: primary_web
+        reference: https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata?view=net-10.0
+        note: HashData accepts a stream and computes SHA-256.
+      - kind: primary_web
+        reference: https://learn.microsoft.com/en-us/dotnet/api/system.io.file.move?view=net-10.0
+        note: Remarks warn that copy-based replacement is not atomic and may leave a partial destination after a crash.
+      - kind: documentation
+        reference: context/foundation/roadmap.yaml S-02
+        note: Requires hash verification, failure reporting and intact source media.
+  - id: F-04
+    question_id: Q-01
+    statement: Core targets .NET 10 without package references. Microsoft.Data.Sqlite is a separate lightweight provider; its database transaction groups database statements, not filesystem copies, into an atomic unit.
+    confidence: supported
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/MediaArchive.Core.csproj
+        note: Checked target framework and project item groups.
+      - kind: primary_web
+        reference: https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/
+        note: Provider installation is through a separate package and uses a local database file.
+      - kind: primary_web
+        reference: https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/transactions
+        note: Documents atomic groups of SQL statements; does not establish atomicity with media file operations.
+options:
+  - topic: Persistent catalog
+    candidates:
+      - name: Built-in JSON file catalog
+        disposition: viable
+        reason: Fits existing System.Text.Json usage and avoids a dependency; planning must address safe updates and future duplicate/provenance associations.
+      - name: SQLite with Microsoft.Data.Sqlite
+        disposition: viable
+        reason: File-based relational storage and transactions support structured updates but require a new dependency and do not make media copies transactional.
+  - topic: Content verification
+    candidates:
+      - name: Hash source and archived file streams with SHA-256
+        disposition: recommend
+        reason: Uses the platform API and checks actual destination content; handle read, copy and mismatch failures explicitly.
+recommendations:
+  - decision: Plan the media-copy and catalog-write failure boundaries together, including collisions, partial destination files, and a catalog write failure after a verified copy; preserve sources and avoid claiming unverified results.
+    basis: [F-01, F-03, F-04]
+    owner: plan
+  - decision: Choose the catalog format in planning, retaining complete available sidecars and explicit unknowns and leaving room for later distinct provenance and duplicate associations.
+    basis: [F-01, F-02, F-04]
+    owner: plan
+open_questions:
+  - question: Which media attribute extraction facilities and formats are available in the intended runtime and representative batch?
+    impact: Coverage of dimensions, duration and frame rate is unverified; planning must specify explicit unknown behavior and investigate a dependency if broader extraction is needed.
+    blocking: false
+  - question: What measurable catalog size or performance limit constitutes lightweight?
+    impact: Catalog options cannot be compared against a quantitative threshold; roadmap risk R-01 remains open.
+    blocking: false
+handoff:
+  summary: Reuse S-01 inspection records and platform SHA-256; choose a durable catalog and specify failure and collision behavior in the plan. S-03 owns duplicate integration and S-04 owns full resume and repeat behavior.
+  do_not_assume:
+    - An intended path is an existing verified archive file or that distinct items have distinct paths.
+    - A database transaction also commits or rolls back filesystem operations.
+    - All media formats expose every requested attribute or that missing values can be inferred safely.

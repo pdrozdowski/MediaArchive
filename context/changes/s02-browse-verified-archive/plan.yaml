@@ -1,0 +1,330 @@
+schema_version: 1
+change_id: s02-browse-verified-archive
+status: done
+source:
+  roadmap: context/foundation/roadmap.yaml
+  milestone_id: M-01
+  item_id: S-02
+  prd: context/foundation/prd.yaml
+  research: context/changes/s02-browse-verified-archive/research.yaml
+  refs:
+  - FR-003
+  - FR-010
+  - FR-011
+  - FR-014
+  - US-01
+  - US-02
+  - NFR-001
+  - NFR-002
+goal:
+  outcome: The operator can archive batch media, verify their content, and browse
+    them by year after a restart.
+  done_when:
+  - Archived content is hash verified and verification failures are reported while
+    source media remain intact.
+  - The local file-based catalog retains available original metadata and specified
+    media attributes, marking unavailable values unknown, across restarts.
+  - Archived photos and videos can be browsed in year-based folders.
+baseline:
+- finding: S-01 stages sources and inspects sidecars, dates and prospective paths
+    without writing the archive; inspection records do not include hashes or media
+    dimensions.
+  evidence: src/MediaArchive.Core/BatchInspector.cs
+- finding: The inspect CLI prints staging and inspection results; staging rejects
+    root overlap, links and preexisting destinations.
+  evidence: src/MediaArchive.CLI/Program.cs; src/MediaArchive.Core/BatchStager.cs
+- finding: Core targets .NET 10 without package references; research compares stream
+    SHA-256, JSON and SQLite.
+  evidence: src/MediaArchive.Core/MediaArchive.Core.csproj; context/changes/s02-browse-verified-archive/research.yaml
+approach:
+  summary: Add an archive command using S-01 staging and inspection, copying media
+    into year folders, independently hashing source and destination, and persisting
+    verified records in a local JSON catalog. Keep all source and staged files; report
+    any failure and never overwrite an existing archive file.
+  reuse:
+  - option: BatchStager and BatchInspector
+    decision: reuse
+    reason: Existing validation, source hierarchy, metadata association and year selection
+      are established contracts.
+  - option: SHA256 stream API and System.Text.Json
+    decision: reuse
+    reason: Platform facilities support required hashes and persistent structured
+      data without an additional dependency; SQLite would add a package and still
+      cannot atomically commit media files with catalog updates.
+  - option: ffprobe command-line media probing
+    decision: reuse
+    reason: Documented JSON stream and format output provides dimensions, duration
+      and frame rate without custom media parsers; https://ffmpeg.org/ffprobe.html.
+      Requires an operator-provided ffprobe executable.
+  decisions:
+  - topic: Catalog representation
+    choice: Versioned JSON catalog under the archive root, with records holding verified
+      media and associated source metadata.
+    rationale: Single-user local slice needs restart persistence and complete metadata
+      without adding a database dependency.
+    authority: agent_proposed
+  - topic: Collision and cleanup policy
+    choice: Report existing or colliding targets as failures without overwrite; never
+      delete source or staged media.
+    rationale: Preserves data until later duplicate integration and recovery slices
+      define broader behavior.
+    authority: agent_proposed
+  - topic: Archive organization
+    choice: Use S-01 selected year or Unknown folder and original filename.
+    rationale: Inherits the established inspection contract and approved year-based
+      browsing.
+    authority: inherited
+design:
+  components:
+  - name: Archive CLI command
+    responsibility: Parse the same input, staging and archive root options as inspect;
+      run staging, inspection and archive integration; print per-item results and
+      diagnostics with nonzero status on failures.
+    touchpoints:
+    - src/MediaArchive.CLI/Program.cs
+    - context/contracts/cli-interface.md
+  - name: Core archive integration and catalog
+    responsibility: Validate archive boundaries, copy and verify staged media, persist
+      and reload records, and report failures.
+    touchpoints:
+    - src/MediaArchive.Core
+    - context/contracts/data-model.md
+  data_flow:
+  - Archive command stages input using BatchStager and inspects via BatchInspector;
+    incomplete staging aborts integration and reports failure.
+  - Resolve each inspected item to its successful staged input root and relative path;
+    validate containment and archive root paths, reject reparse points and collisions,
+    and copy without overwrite into year or Unknown folder.
+  - Independently hash staged source and destination with SHA-256; only matching copies
+    may be represented as verified catalog entries.
+  - Persist each verified record with full associated sidecar JSON, source identity,
+    archive location, media kind, year, timestamps, size, hash and known attributes;
+    read the catalog on later process invocation.
+  contracts:
+  - boundary: CLI to Core
+    input: One or more ZIP or folder inputs, new staging parent and name, archive
+      root.
+    output: Per-item verified or failed result with path and diagnostics; exit 0 only
+      if staging and all archive and catalog writes succeed, 1 on processing failure,
+      2 on invalid arguments.
+  - boundary: Catalog persistence
+    input: Verified copy and inspection record.
+    output: Versioned local JSON with original sidecar object or explicit unknown,
+      source identity and explicit unknown values for unavailable specified attributes;
+      preserve existing records on update.
+  - boundary: Attribute capture
+    input: Inspected sidecar and staged media file.
+    output: Run ffprobe on each staged file using argument-list invocation with -v
+      error -select_streams v:0 -show_entries stream=width,height,avg_frame_rate,duration:format=duration
+      -of json. Use positive width and height; for video use valid stream duration
+      with format duration fallback and positive rational average frame rate with
+      nonzero denominator; photos have unknown duration and fps. Record missing, malformed
+      or unsupported fields explicitly unknown; preserve full sidecar and its available
+      timestamps. ffprobe unavailable or failure produces a diagnostic and unknown
+      probe-derived fields, never a fabricated value. File size, hashes, and processing
+      timestamps come from file and workflow.
+  - boundary: Fresh-process catalog read test
+    input: Archive root containing persisted catalog; no staging or batch input
+    output: A small test helper process calls the Core catalog reader and emits JSON;
+      integration test removes staging, launches helper, and asserts saved records
+      and explicit unknowns.
+  failure_semantics:
+  - case: Failed staging, unreadable media, copy error, hash mismatch or destination
+      collision
+    behavior: Report failure, never delete or alter input or staged source, never
+      overwrite an existing archive file, and never catalog the failed copy as verified.
+      Leave any uncertain partial output identifiable and report its path.
+  - case: Catalog missing, malformed, unreadable or write fails
+    behavior: Missing catalog starts empty only when genuinely absent; malformed or
+      unreadable catalog fails closed without replacing it. Write a temporary file
+      in the catalog directory and replace the catalog only after complete serialization;
+      report write failure and any already verified but uncataloged copy, leaving
+      existing catalog and sources intact.
+  - case: Interrupted copy or publication
+    behavior: Never assume a leftover file is verified; no automatic overwrite or
+      blind retry. Report a collision for a subsequent attempt and retain sources
+      for manual resolution; full resumption belongs to S-04.
+  - case: Unsafe paths or links
+    behavior: Reject paths escaping roots or traversing reparse points and report
+      failure before writing media.
+tasks:
+- id: T-01
+  outcome: Archive command stages, inspects and copies a representative batch into
+    selected year folders without changing inspect behavior.
+  done_when:
+  - CLI accepts documented archive arguments and reports incomplete staging without
+    integrating media; inspect remains read-only.
+  - Both photos and videos are copied to their selected year or Unknown folder without
+    overwriting existing targets; unsafe roots and links are rejected.
+  execution:
+    status: done
+    checks:
+    - name: .\scripts\test.ps1
+      result: passed
+      evidence: Build succeeded; 27 tests passed, 0 failed, exit code 0.
+    - name: T-01 acceptance inspection
+      result: passed
+      evidence: ArchiveCopier verifies archive root containment, rejects reparse components
+        and uses FileMode.CreateNew. Incomplete staging aborts before archive creation.
+        Source and staged files are not deleted.
+    files:
+    - src/MediaArchive.CLI/Program.cs
+    - src/MediaArchive.Core/ArchiveCopier.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    commit: null
+- id: T-02
+  outcome: Each copied item is independently hash verified and failures are observable
+    without source loss.
+  depends_on:
+  - T-01
+  done_when:
+  - Source and destination SHA-256 hashes are calculated independently and only equal
+    hashes yield verified status.
+  - Copy errors, unreadable inputs, hash mismatch and collisions return failure, identify
+    affected item and preserve original and staged sources.
+  execution:
+    status: done
+    checks:
+    - name: .\scripts\test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 27 tests passed, exit
+        code 0.
+    - name: T-02 implementation inspection
+      result: passed
+      evidence: ArchiveCopier independently hashes staged source and destination via
+        SHA256.HashData and only adds equal hashes to VerifiedCopies; failures produce
+        per-item diagnostics.
+    files:
+    - src/MediaArchive.Core/ArchiveCopier.cs
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    commit: null
+- id: T-03
+  outcome: Verified items and available metadata persist in a local catalog across
+    process restarts.
+  depends_on:
+  - T-02
+  done_when:
+  - Catalog stores full available sidecar and source association, archive path, filename,
+    media type, timestamps, dimensions, video duration and frame rate, size and SHA-256;
+    unavailable fields are explicit unknowns.
+  - Existing records survive updates and process restart; malformed catalog and write
+    failure are reported without replacing prior records or claiming catalog success.
+  - Catalog writes use a temporary file and publish only complete serialized content,
+    and report verified copies left uncataloged on failure.
+  - Probe a known-dimension photo and known-dimension, duration and frame-rate video
+    using ffprobe; test malformed or missing probe values and unavailable executable
+    as explicit unknown with diagnostics.
+  execution:
+    status: done
+    checks:
+    - name: .\scripts\test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 32 tests passed, exit
+        code 0.
+    - name: T-03 acceptance coverage
+      result: passed
+      evidence: Tests cover known ffprobe JSON attrs, malformed/unavailable probe
+        unknowns, malformed catalog preservation, catalog write failure uncataloged
+        reporting, and retention of prior catalog entries.
+    files:
+    - src/MediaArchive.Core/ArchiveCatalog.cs
+    - src/MediaArchive.Core/ArchiveCatalogIntegrator.cs
+    - src/MediaArchive.Core/MediaProbe.cs
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/ArchiveCatalogTests.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    commit: null
+- id: T-04
+  outcome: Integrated CLI flow and contracts are validated against representative
+    and failure fixtures.
+  depends_on:
+  - T-03
+  done_when:
+  - Automated tests cover CLI end-to-end archive and restart, year and Unknown folders,
+    metadata and unknown fields, hash mismatch, copy and catalog failures, collisions
+    and intact sources.
+  - Update CLI and data-model contracts to match actual behavior and run solution
+    build and tests.
+  - A separate test helper process reads the catalog through the Core reader after
+    staging is removed, without starting a batch; assert all retained records and
+    known and unknown fields.
+  execution:
+    status: done
+    checks:
+    - name: .\scripts\test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 32 tests passed, exit
+        code 0.
+    - name: 20x-implement tests
+      result: passed
+      evidence: 19 skill tests passed, 0 failures.
+    - name: execution validator
+      result: passed
+      evidence: validate_execution.py reported execution progress structurally consistent.
+    - name: T-04 acceptance review
+      result: passed
+      evidence: CLI/data-model contracts describe archive/catalog/browse behavior;
+        end-to-end test archives photo and unknown-year media, removes staging, and
+        launches separate dotnet CLI process to browse catalog.
+    files:
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    - context/contracts/cli-interface.md
+    - context/contracts/data-model.md
+    commit: null
+verification:
+- id: V-01
+  criterion: Archived content is hash verified and verification failures are reported
+    while source media remain intact.
+  method: automated
+  check: Compare fixture source and destination digests; inject copy, hash mismatch
+    and read failures; assert reported failure, no verified catalog record, and unchanged
+    source and staged bytes.
+- id: V-02
+  criterion: The local file-based catalog retains available original metadata and
+    specified media attributes, marking unavailable values unknown, across restarts.
+  method: automated
+  check: Archive known-dimension photo and known-dimension, duration and frame-rate
+    video fixtures using ffprobe, plus missing-value fixtures; remove staging, run
+    a separate helper process invoking the Core catalog reader, and assert full sidecar,
+    source identity, required known values and explicit unknowns and existing records.
+    Inject unavailable probe, malformed catalog and write failure.
+- id: V-03
+  criterion: Archived photos and videos can be browsed in year-based folders.
+  method: mixed
+  check: Archive dated photo and video plus unknown-date fixture, assert actual year
+    and Unknown paths and inspect folders manually; test collision without overwrite.
+risks:
+- description: Media attribute extraction coverage varies by format and no quantitative
+    lightweight threshold is specified.
+  mitigation: Use documented ffprobe when installed, report unavailable or failed
+    probing and explicitly mark affected attributes unknown; preserve full metadata.
+    Defer catalog performance measurement until representative volume is known.
+  blocking: false
+- description: File publication and catalog updates are not one transaction.
+  mitigation: Report verified but uncataloged copies and fail closed on existing paths;
+    retain sources for manual correction.
+  blocking: false
+later:
+- item: Duplicate associations and automatic recovery of interrupted work.
+  revisit_when: S-03 and S-04 are planned.
+open_questions: []
+review:
+  status: signed_off
+  report: context/changes/s02-browse-verified-archive/plan-review.yaml
+  plan_digest: a2427a40c38bbd6e50518fce957571a22bfe2331bcd3b36c4e14797997e5e927
+  user_approval: confirmed
+  dispositions:
+  - finding_id: R-01
+    disposition: fixed
+    rationale: Specified ffprobe JSON fields, validation, unavailable behavior and
+      known-value fixtures.
+    changed_paths:
+    - context/changes/s02-browse-verified-archive/plan.yaml
+  - finding_id: R-02
+    disposition: fixed
+    rationale: Specified separate test helper process invoking Core reader without
+      staging.
+    changed_paths:
+    - context/changes/s02-browse-verified-archive/plan.yaml
