@@ -73,7 +73,13 @@ tasks:
     intact; unsafe paths, links, overlaps, collisions and I/O failures produce diagnostics
     and incomplete status without altering sources.
   execution:
-    status: in_progress
+    status: done
+    checks:
+    - name: scripts/test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 12 MediaArchive.Tests
+        passed, 0 skipped. Fixtures verify hierarchy/source bytes, traversal, malformed
+        ZIP, collisions, symlink alias, overlaps and injected I/O failure.
 - id: T-02
   outcome: Prepare inspection records from staged media.
   depends_on:
