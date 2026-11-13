@@ -1,0 +1,86 @@
+schema_version: 1
+change_id: s01-inspect-takeout-batch
+plan_path: context/changes/s01-inspect-takeout-batch/plan.yaml
+plan_digest: 00916a1eced809f598f0a65d07f73645a2afd33378525bb38d1ec87210fa887b
+scope:
+  tasks: [T-01, T-02, T-03]
+  git_baseline: b671fa3
+  git_head: 77351697f6aab8a16f71057db478e76f436e849f
+  commits: [77ecd34, 20142ff, 7735169]
+  preexisting_untracked:
+    - context/foundation/samsung-s25-mtp-probe.md
+    - context/foundation/samsung-s25-photo-20261111_222543-evidence.md
+  reviewed_paths:
+    - src/MediaArchive.Core/BatchStager.cs
+    - src/MediaArchive.Core/BatchInspector.cs
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/BatchStagerTests.cs
+    - tests/MediaArchive.Tests/BatchInspectorTests.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    - context/contracts/cli-interface.md
+    - context/contracts/data-model.md
+verdict: approved
+review_round: 0
+reviewers:
+  acceptance: completed
+  engineering: completed
+checks:
+  - command: python .agents/skills/20x-implement/scripts/verify_signoff.py context/changes/s01-inspect-takeout-batch/plan.yaml context/changes/s01-inspect-takeout-batch/plan-review.yaml
+    result: passed
+    evidence: Exit 0; current signed-off plan matches independent review and explicit user approval.
+  - command: ./scripts/test.ps1
+    result: passed
+    evidence: Exit 0; solution build succeeded with 0 warnings and errors; 25 tests passed, 0 skipped.
+  - command: dotnet run --project src/MediaArchive.CLI/MediaArchive.CLI.csproj --no-build -- inspect --input <zip> --input <folder> --staging-parent <temp> --staging-name run-1 --archive-root <temp>
+    result: passed
+    evidence: Isolated mixed ZIP/folder fixture returned exit 0, displayed 2021 and 2020 records, listed an unsupported file and missing-sidecar diagnostics; source ZIP and folder bytes remained present and unchanged.
+  - command: dotnet run --project src/MediaArchive.CLI/MediaArchive.CLI.csproj --no-build -- inspect --input <malformed-zip> --staging-parent <temp> --staging-name run-2 --archive-root <temp>
+    result: passed
+    evidence: Isolated malformed ZIP returned exit 1, displayed incomplete batch and staging-failed diagnostic; original ZIP contents remained unchanged.
+  - command: python -m unittest discover -s .agents/skills/20x-impl-review/tests -v
+    result: passed
+    evidence: Exit 0; 12 review-validator tests passed.
+  - command: python .agents/skills/20x-impl-review/scripts/validate_review.py context/changes/s01-inspect-takeout-batch/reviews/impl-review.yaml --plan context/changes/s01-inspect-takeout-batch/plan.yaml
+    result: passed
+    evidence: Exit 0; review report is structurally valid (not a code correctness assertion).
+dimensions:
+  plan_adherence: pass
+  scope_discipline: pass
+  safety_quality: warning
+  architecture: pass
+  pattern_consistency: pass
+  success_criteria: pass
+findings:
+  - id: F-01
+    severity: low
+    impact: low
+    dimension: success_criteria
+    target: src/MediaArchive.Core/BatchInspector.cs:154
+    source_ref: plan.design.contracts[2]
+    evidence: When an associated sidecar omits photoTakenTime or timestamp, SelectYear falls through to filename selection without adding a date diagnostic. The CLI contract says diagnostics cover unusable dates; the date-selection design also calls for preserving a diagnostic. Filename fallback itself returns the expected year.
+    reproduction: Given a media filename with a valid year token and a uniquely matching JSON sidecar with no photoTakenTime field, inspect it; expect the filename-derived year and a date fallback diagnostic, but observe the year without that diagnostic. Existing tests cover absent sidecars and malformed/zero/out-of-range timestamp values, but not an associated sidecar missing the date fields.
+    recommended_fix: Add a date fallback diagnostic when the sidecar or timestamp field is absent and add a focused assertion for that case; retain the approved filename fallback behavior.
+    status: open
+    rounds_seen: [0]
+    verification: null
+  - id: F-02
+    severity: info
+    impact: low
+    dimension: architecture
+    target: src/MediaArchive.Core/BatchInspector.cs:83
+    source_ref: plan.tasks.T-02.done_when[0]
+    evidence: The per-media pass scans all parsed sidecars for a local match; cross-part and unresolved-sidecar diagnostics also scan media collections. This yields repeated collection scans (approximately media-count times sidecar-count). No timing failure was observed and the available research sample is below 900 media files, so practical impact at larger export sizes is unmeasured.
+    reproduction: Static inspection of the local association at line 83 and cross-part scans at lines 99 and 117; no representative-scale benchmark was run, so there is no measured slow-case reproduction.
+    recommended_fix: If representative full-batch measurements show material delay, build dictionaries keyed by input root, directory, and title to avoid repeated scans; first add a realistic benchmark rather than changing behavior speculatively.
+    status: open
+    rounds_seen: [0]
+    verification: null
+history:
+  - round: 0
+    outcome: Two independent audits completed; no unresolved MEDIUM+ issue found. Low-severity missing-date diagnostic detail and unmeasured scaling observation remain documented; all executable verification passed.
+    checks:
+      - ./scripts/test.ps1 (exit 0; 25 passed)
+      - Real CLI mixed batch (exit 0) and malformed ZIP (exit 1); source inputs preserved
+      - python -m unittest discover -s .agents/skills/20x-impl-review/tests -v (exit 0; 12 passed)
+    commits: [77ecd34, 20142ff, 7735169]
+summary: All signed-off S-01 task criteria and mandatory executable checks passed. Acceptance audit found no gaps. Engineering audit identified one low-severity omission in diagnostics when capture-date fields are absent and an unmeasured collection-scan scaling concern; neither is a binding failure or MEDIUM+ blocker. The two preexisting untracked Samsung evidence files were left untouched.
