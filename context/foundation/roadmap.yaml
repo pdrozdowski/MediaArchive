@@ -26,7 +26,7 @@ milestone:
         - Each recognized item shows available metadata, explicit unknowns, intended archive location and processing timestamps.
       refs: [FR-001, FR-002, US-01]
       depends_on: []
-      status: planning
+      status: in_progress
     - id: S-02
       title: Browse a verified archive
       change_id: s02-browse-verified-archive

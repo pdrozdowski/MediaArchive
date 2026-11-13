@@ -1,6 +1,6 @@
 schema_version: 1
 change_id: s01-inspect-takeout-batch
-status: implementing
+status: done
 source:
   roadmap: context/foundation/roadmap.yaml
   milestone_id: M-01
@@ -98,6 +98,11 @@ tasks:
         BatchInspector fixtures verify sidecar field preservation and associations,
         unknowns, UTC metadata year/fallback, unsupported types, collisions, and unresolved
         metadata diagnostics.
+    - name: commit
+      result: passed
+      evidence: Task-scoped commit 20142ff created after successful scripts/test.ps1
+        run.
+    commit: 20142ff
 - id: T-03
   outcome: Deliver an integrated CLI inspection and document observable contracts.
   depends_on:
@@ -107,6 +112,14 @@ tasks:
     nonzero on staging failure; a mixed fixture demonstrates the entire flow.
   - Update CLI and data-model contracts to describe inputs, outputs, unknowns and
     failure behavior.
+  execution:
+    status: done
+    checks:
+    - name: scripts/test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 25 tests passed, 0 skipped.
+        CLI integration fixtures verify mixed ZIP/folder output, metadata/diagnostics,
+        source preservation, and nonzero exit on staging failure.
 verification:
 - id: V-01
   criterion: Extraction preserves the source hierarchy and reports failures without

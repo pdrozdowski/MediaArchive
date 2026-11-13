@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MediaArchive.Core\MediaArchive.Core.csproj" />
+    <ProjectReference Include="..\..\src\MediaArchive.CLI\MediaArchive.CLI.csproj" />
   </ItemGroup>
 
 </Project>
