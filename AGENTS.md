@@ -39,6 +39,7 @@ Component-specific instructions may be added at these locations:
 
 ## Working Rules
 
+- Don't use Serena integration.
 - Read only the contracts relevant to the task.
 - Follow the [solution-wide code organization guidelines](context/guidelines/code-organization.md).
 - Prefer existing libraries and project patterns; do not add dependencies or abstractions without a demonstrated need.
