@@ -1,0 +1,122 @@
+schema_version: 1
+change_id: s01-inspect-takeout-batch
+review_round: 1
+plan_path: context/changes/s01-inspect-takeout-batch/plan.yaml
+plan_digest: c2cf911268d1effbc2a6bfe60734f272f12f784a8319f1560dd087b65f6ea62a
+verdict: changes_required
+sources:
+  roadmap: context/foundation/roadmap.yaml
+  prd: context/foundation/prd.yaml
+  research: context/changes/s01-inspect-takeout-batch/research.yaml
+requirement_coverage:
+- ref: FR-001
+  assessment: partial
+  scoped_obligation: Extract supplied Takeout inputs into staging while preserving
+    hierarchy and reporting failures without removing source media.
+  tasks:
+  - T-01
+  - T-03
+  verification:
+  - V-01
+  evidence: prd.yaml FR-001 and US-01; plan T-01, design.failure_semantics and V-01
+  gap: The separation guarantee does not specify how to reject link-containing ancestor
+    paths that can redirect staging writes into source.
+- ref: FR-002
+  assessment: partial
+  scoped_obligation: Prepare every recognized item with available metadata or explicit
+    unknowns, intended archive location and processing timestamps.
+  tasks:
+  - T-02
+  - T-03
+  verification:
+  - V-02
+  evidence: prd.yaml FR-002; plan approach.decisions, design.failure_semantics, T-02
+    and V-02
+  gap: Missing/invalid metadata date has conflicting fallback and unknown-year behavior,
+    and the plan does not define how to interpret the observed sidecar timestamp.
+- ref: US-01
+  assessment: partial
+  scoped_obligation: Within S-01, preserve extraction hierarchy, report failure and
+    prepare each item with metadata/unknowns, intended location and timestamps. Archive,
+    cleanup, durable reports and resumability are later slices.
+  tasks:
+  - T-01
+  - T-02
+  - T-03
+  verification:
+  - V-01
+  - V-02
+  evidence: prd.yaml US-01 acceptance criteria; roadmap S-01 to S-04; plan tasks and
+    verification
+  gap: The same staging path safety and date fallback ambiguities affect the scoped
+    extraction and preparation criteria.
+acceptance_checks:
+- task_id: T-01
+  criterion_index: 0
+  assessment: partial
+  given: ZIPs and extracted folders including nested paths, failures and link-containing
+    paths
+  when: Stage batch into new isolated directory
+  then: Preserve hierarchy, report failures and incomplete state without changing
+    inputs
+  gap: No concrete ancestor-link validation ensures staging cannot alias a source
+    despite lexical separation.
+- task_id: T-02
+  criterion_index: 0
+  assessment: partial
+  given: Recognized media with sidecar dates and filenames containing dates
+  when: Prepare item record
+  then: Show source identity, metadata, unknowns, UTC preparation timestamp and prospective
+    path
+  gap: Conflicting date fallback semantics and undefined sidecar timestamp decoding
+    prevent a reliable year oracle.
+- task_id: T-02
+  criterion_index: 1
+  assessment: pass
+  given: Staged batch with missing, malformed, competing and cross-part sidecars,
+    unsupported files and path collisions
+  when: Inspect batch
+  then: Report unresolved associations, unsupported files and prospective path collisions.
+- task_id: T-03
+  criterion_index: 0
+  assessment: pass
+  given: Mixed input fixture and selected roots, including a staging failure case
+  when: Run CLI inspection
+  then: Display item records and diagnostics and return nonzero for staging failure.
+- task_id: T-03
+  criterion_index: 1
+  assessment: pass
+  given: Completed CLI inspection and data record behavior
+  when: Update the referenced contracts
+  then: Document input, output, unknown and failure semantics.
+findings:
+- id: R-01
+  severity: major
+  target: approach.decisions[1]; design.failure_semantics[1]; verification.V-02
+  issue: The date decision requires filename fallback after an unusable sidecar date,
+    while the missing/invalid date failure behavior says to emit unknown values; moreover
+    the plan does not say how to decode and validate the sample sidecar photoTakenTime
+    timestamp or derive its year. An implementation can choose Unknown or a filename
+    year for the same item, or fail to use the available sidecar date.
+  required_fix: Specify the accepted sidecar timestamp format, timezone/year interpretation
+    and invalid/missing behavior, make the filename fallback and final Unknown precedence
+    consistent in failure semantics, and require tests asserting each expected year.
+    Preserve the user-selected metadata-then-filename precedence.
+  evidence: plan approach year decision and design failure semantics; research F-07
+    documents photoTakenTime; FR-002 and S-01 require intended location.
+- id: R-02
+  severity: major
+  target: design.failure_semantics[2]; verification.V-01
+  issue: Checking that the immediate staging parent is not a link does not exclude
+    junctions or symlinks in its ancestor path. A lexically separate staging parent
+    can resolve inside a source through an ancestor link, defeating the source/staging
+    overlap guarantee and permitting unintended writes into source directories.
+  required_fix: Define an implementable path safety check covering all existing path
+    components and resolved overlap (or reject any reparse-point ancestor) for source,
+    staging and archive roots; include a fixture where an ancestor link aliases a
+    source and assert rejection before writes.
+  evidence: plan staging security semantics; research F-01 identifies destination
+    link risks; S-01 requires source preservation.
+summary: 'Changes required: the plan preserves scope and sets conservative association
+  policy, but date precedence/decoding and staging ancestor-link containment need
+  executable rules before implementation.'

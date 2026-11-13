@@ -1,0 +1,160 @@
+schema_version: 1
+change_id: s01-inspect-takeout-batch
+status: partial
+source:
+  roadmap: context/foundation/roadmap.yaml
+  item_id: S-01
+  prd: context/foundation/prd.yaml
+  refs:
+  - FR-001
+  - FR-002
+  - US-01
+questions:
+- id: Q-01
+  question: What can the platform safely provide for ZIP extraction while preserving hierarchy and reporting failure?
+  why: S-01 requires hierarchy preservation and source media retention even on failure.
+  status: answered
+- id: Q-02
+  question: What evidence supports associating Takeout metadata with recognized media and selecting an archive year?
+  why: Incorrect associations or dates would misrepresent items and their intended archive locations.
+  status: partial
+findings:
+- id: F-01
+  question_id: Q-01
+  statement: The .NET ZIP extraction API preserves entry-relative paths, rejects paths outside the destination and
+    reports collisions or invalid archives by exception; extraction can leave partial output. Existing destination
+    symlinks or junctions can redirect writes, and the API imposes no resource limits for untrusted archives.
+  confidence: supported
+  evidence:
+  - kind: primary_web
+    reference: https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.zipfile.extracttodirectory?view=net-10.0
+    note: Reviewed the documented overload behavior, exceptions, partial extraction and destination link remarks.
+  - kind: primary_web
+    reference: https://learn.microsoft.com/en-us/dotnet/standard/io/zip-tar-best-practices
+    note: Reviewed extraction safety and resource-limit guidance.
+- id: F-02
+  question_id: Q-01
+  statement: The Core project targets .NET 10 and contains only an empty starter class; the CLI and test are also
+    starter placeholders. No extraction implementation or fixture is present in the inspected source and test files.
+  confidence: verified
+  evidence:
+  - kind: repository
+    reference: src/MediaArchive.Core/MediaArchive.Core.csproj; src/MediaArchive.Core/Class1.cs; src/MediaArchive.CLI/Program.cs;
+      tests/MediaArchive.Tests/UnitTest1.cs
+    note: Inspected project target, starter files, and source/test file inventory.
+- id: F-03
+  question_id: Q-02
+  statement: Discovery records one user-supplied photo sidecar with a URL, title, timestamps, location and upload
+    origin, and a user report that some media lacks metadata. This observation does not establish a matching rule
+    or coverage across exports.
+  confidence: verified
+  evidence:
+  - kind: repository
+    reference: context/foundation/discovery.yaml F-035 and F-036
+    note: Reviewed the recorded sample and its explicitly stated limitations; the original sample was not independently
+      inspected here.
+- id: F-04
+  question_id: Q-02
+  statement: S-01 requires available metadata or explicit unknowns and an intended archive location; the PRD chooses
+    year-based folders but does not specify a date precedence or unknown-year placement.
+  confidence: verified
+  evidence:
+  - kind: repository
+    reference: context/foundation/roadmap.yaml S-01; context/foundation/prd.yaml FR-002 and D-013
+    note: Compared the slice completion criteria and archive organization decision.
+- id: F-05
+  question_id: Q-02
+  statement: In the supplied part_01 directory, 847 media files (812 JPG, 35 MP4, 4 GIF) and 887 JSON files were
+    inventoried. All JSON files parsed as objects. Exact JSON title-to-media filename comparison found 56 matching
+    sidecars, each in the same directory as its uniquely named media; 831 sidecars had no title match anywhere in
+    this part, and 791 media files had no title match. This is a sample-part inventory, not evidence that missing
+    counterparts do not exist in other parts.
+  confidence: verified
+  evidence:
+  - kind: experiment
+    reference: C:\data\takeout\part_01
+    note: Recursively enumerated files, parsed JSON, compared title exactly with JPG/MP4/GIF basenames globally
+      and within each directory. Counts corrected for 56 matched media.
+- id: F-06
+  question_id: Q-02
+  statement: 876 of 887 JSON filenames exactly equal their title plus .supplemental-metadata.json; 11 use .supplemental-metadata(1).json.
+    One numbered sidecar has a same-directory media title match. No same-directory duplicate JSON title occurred
+    in this sample; the numbered suffix alone does not prove a general matching rule.
+  confidence: verified
+  evidence:
+  - kind: experiment
+    reference: C:\data\takeout\part_01
+    note: Compared each JSON filename with its parsed title, grouped titles within directories, and inspected the
+      11 deviations.
+- id: F-07
+  question_id: Q-02
+  statement: All 887 sidecars contain title, description, imageViews, creationTime, photoTakenTime, geoData and
+    url keys; 787 contain geoDataExif, 883 googlePhotosOrigin, and 698 appSource. Presence of a key does not establish
+    a meaningful value, correct pairing, or a trustworthy date.
+  confidence: verified
+  evidence:
+  - kind: experiment
+    reference: C:\data\takeout\part_01
+    note: Counted top-level JSON keys without assessing value validity or disclosing personal metadata.
+options:
+- topic: ZIP extraction
+  candidates:
+  - name: Use the .NET ZIP API with explicit failure handling
+    disposition: recommend
+    reason: Reuses platform hierarchy and path checks, while planning must handle partial results, collisions, source
+      separation and destination link risks.
+  - name: Implement extraction entry by entry
+    disposition: viable
+    reason: Enables finer reporting and policy control but requires careful path validation and does not by itself
+      establish resume behavior.
+- topic: Metadata association
+  candidates:
+  - name: Support only fixture-validated unambiguous associations
+    disposition: recommend
+    reason: Avoids asserting unverified filename conventions; retain unknowns and surface ambiguity for planning.
+  - name: Infer associations from filenames or dates alone
+    disposition: reject
+    reason: Available evidence does not establish uniqueness or complete naming rules, particularly for edits and
+      duplicates.
+recommendations:
+- decision: Plan a non-destructive ZIP extraction path, reporting partial failure and testing collisions, traversal
+    and destination links; do not equate extraction with successful archival verification.
+  basis:
+  - F-01
+  - F-02
+  owner: plan
+- decision: Use the supplied sample to design fixture-backed checks for exact same-directory title and supplemental-metadata
+    naming, including numbered suffixes; treat missing or competing matches as unresolved and verify additional
+    parts before claiming coverage.
+  basis:
+  - F-03
+  - F-05
+  - F-06
+  owner: plan
+- decision: Resolve date precedence, unknown-year location, accepted input formats and supported media types in
+    the plan interview; these are not established by this research.
+  basis:
+  - F-03
+  - F-04
+  owner: plan
+open_questions:
+- question: Do other export parts contain the missing counterparts, and what other naming, duplicate, edited and
+    collision cases occur across a complete batch?
+  impact: This partial sample leaves 831 sidecars and 791 media without a title match, so complete-batch association
+    and coverage cannot yet be established.
+  blocking: true
+- question: Which date should determine the archive year, and where should an item with no trustworthy date be intended
+    to go?
+  impact: Intended locations cannot be defined for all items without a planning decision.
+  blocking: false
+- question: Which archive input formats and batch boundaries must the first slice support?
+  impact: The ZIP API evidence alone does not establish coverage of the user's exports.
+  blocking: false
+handoff:
+  summary: The built-in ZIP API is a plausible starting point with explicit partial-failure and destination handling.
+    The supplied part shows exact title matches and numbered sidecars, but most files lack counterparts in this
+    part; complete-batch matching remains unverified. Planning owns input scope and year selection.
+  do_not_assume:
+  - All Takeout exports use one sidecar naming convention or contain reliable capture dates.
+  - A successful extraction proves source media were archived or verified.
+  - A partially extracted directory represents a completed batch.

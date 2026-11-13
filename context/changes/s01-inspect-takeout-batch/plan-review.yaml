@@ -1,0 +1,88 @@
+schema_version: 1
+change_id: s01-inspect-takeout-batch
+review_round: 2
+plan_path: context/changes/s01-inspect-takeout-batch/plan.yaml
+plan_digest: 00916a1eced809f598f0a65d07f73645a2afd33378525bb38d1ec87210fa887b
+verdict: pass
+sources:
+  roadmap: context/foundation/roadmap.yaml
+  prd: context/foundation/prd.yaml
+  research: context/changes/s01-inspect-takeout-batch/research.yaml
+requirement_coverage:
+- ref: FR-001
+  assessment: covered
+  scoped_obligation: Extract inputs into staging preserving hierarchy and report failures
+    without removing source media.
+  tasks:
+  - T-01
+  - T-03
+  verification:
+  - V-01
+  evidence: prd.yaml FR-001 and US-01; plan T-01 and design.failure_semantics; V-01
+    tests input hierarchy and preservation.
+- ref: FR-002
+  assessment: covered
+  scoped_obligation: Prepare each recognized item with available metadata or explicit
+    unknowns, intended location and processing timestamps.
+  tasks:
+  - T-02
+  - T-03
+  verification:
+  - V-02
+  evidence: prd.yaml FR-002; plan T-02, metadata and date selection contracts and
+    V-02.
+- ref: US-01
+  assessment: covered
+  scoped_obligation: For S-01, extract preserving hierarchy, report failure and prepare
+    each item with metadata, explicit unknowns, intended location and timestamps;
+    archive, cleanup, durable reports and resumability are subsequent slices.
+  tasks:
+  - T-01
+  - T-02
+  - T-03
+  verification:
+  - V-01
+  - V-02
+  evidence: prd.yaml US-01 criteria; roadmap S-01 through S-04; plan tasks, design
+    and verification.
+acceptance_checks:
+- task_id: T-01
+  criterion_index: 0
+  assessment: pass
+  given: Nested ZIPs and directories, unsafe paths, an ancestor alias and failure
+    fixtures
+  when: Stage the supplied inputs
+  then: Preserve input hierarchy in separate roots; reject alias before writes and
+    report errors and incomplete status without changing sources.
+- task_id: T-02
+  criterion_index: 0
+  assessment: pass
+  given: Recognized media with matching, missing and invalid metadata and filename
+    dates
+  when: Prepare item records
+  then: Show source identity, available fields, unknowns, UTC timestamp and intended
+    path using UTC metadata year then filename year then Unknown.
+- task_id: T-02
+  criterion_index: 1
+  assessment: pass
+  given: Missing, malformed, competing and cross-part sidecars, unsupported files
+    and intended-path collisions
+  when: Inspect the staged batch
+  then: Report unresolved associations, unsupported files and intended-path collisions.
+- task_id: T-03
+  criterion_index: 0
+  assessment: pass
+  given: Mixed input fixture, selected roots and staging failure fixture
+  when: Run CLI inspection
+  then: Display item records and diagnostics and return nonzero for staging failure.
+- task_id: T-03
+  criterion_index: 1
+  assessment: pass
+  given: Completed CLI and data record behavior
+  when: Update referenced contracts
+  then: Document inputs, outputs, unknowns and failure behavior.
+findings: []
+summary: 'PASS on current plan: R-01 is resolved by explicit UTC Unix-seconds parsing
+  and filename fallback assertions; R-02 is resolved by rejecting reparse points in
+  every existing root component, checking overlap, and testing ancestor aliases. No
+  new findings.'

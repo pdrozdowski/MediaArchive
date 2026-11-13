@@ -1,0 +1,205 @@
+schema_version: 1
+change_id: s01-inspect-takeout-batch
+status: implementing
+source:
+  roadmap: context/foundation/roadmap.yaml
+  milestone_id: M-01
+  item_id: S-01
+  prd: context/foundation/prd.yaml
+  refs:
+  - FR-001
+  - FR-002
+  - US-01
+  research: context/changes/s01-inspect-takeout-batch/research.yaml
+goal:
+  outcome: The operator can extract a Takeout batch and inspect its recognized media
+    and preparation information.
+  done_when:
+  - Extraction preserves the source hierarchy and reports failures without removing
+    source media.
+  - Each recognized item shows available metadata, explicit unknowns, intended archive
+    location and processing timestamps.
+baseline:
+- finding: Core, CLI and tests are starter placeholders; no existing extraction or
+    preparation implementation.
+  evidence: src/MediaArchive.Core/Class1.cs; src/MediaArchive.CLI/Program.cs; tests/MediaArchive.Tests/UnitTest1.cs
+- finding: Partial research establishes ZIP platform behavior and limited same-directory
+    sidecar evidence; complete-batch matching remains unverified.
+  evidence: context/changes/s01-inspect-takeout-batch/research.yaml
+approach:
+  summary: Inspect one operator-specified batch of ZIPs and extracted folders in isolated
+    staging, prepare item records, and display them without modifying source or archive.
+  reuse:
+  - option: .NET System.IO.Compression and System.Text.Json
+    decision: reuse
+    reason: Built-in ZIP and JSON support; existing research documents ZIP path and
+      partial extraction caveats.
+  - option: Existing Core/CLI/test code
+    decision: adapt
+    reason: Projects exist but contain only starter placeholders; use Core for logic
+      and xUnit for tests.
+  decisions:
+  - topic: Inputs and batch
+    choice: Accept one or more ZIP files and/or extracted folders as an explicitly
+      supplied batch; stage each input in its own numbered root to preserve hierarchy
+      and avoid cross-part collisions.
+    rationale: User selected both input types and multiple parts.
+    authority: user_confirmed
+  - topic: Year and metadata matching
+    choice: Use an unambiguously associated valid photo-taken metadata date, then
+      a valid date in the media filename, otherwise Unknown; report ambiguous and
+      cross-part sidecars as unresolved.
+    rationale: User chose date precedence and conservative unresolved associations.
+    authority: user_confirmed
+  - topic: Recognition
+    choice: 'Recognize common photo and video extensions case-insensitively: jpg,
+      jpeg, png, gif, webp, heic, heif, bmp, tif, tiff, mp4, mov, m4v, avi, mpg, mpeg,
+      3gp, and webm; report other files as unrecognized.'
+    rationale: Concrete initial coverage for user-selected common formats; explicit
+      reporting avoids silent omission.
+    authority: agent_proposed
+  - topic: Filename date
+    choice: Accept a unique valid YYYYMMDD or YYYY-MM-DD date token bounded by non-digits
+      in the filename; multiple distinct dates, invalid dates, or absent dates produce
+      Unknown.
+    rationale: Deterministic conservative fallback; no inferred dates from filesystem
+      timestamps.
+    authority: agent_proposed
+tasks:
+- id: T-01
+  outcome: Stage a supplied batch safely in Core.
+  done_when:
+  - ZIPs and extracted folders stage under separate input roots with relative hierarchy
+    intact; unsafe paths, links, overlaps, collisions and I/O failures produce diagnostics
+    and incomplete status without altering sources.
+  execution:
+    status: in_progress
+- id: T-02
+  outcome: Prepare inspection records from staged media.
+  depends_on:
+  - T-01
+  done_when:
+  - Recognized items expose source identity, available sidecar fields, explicit unknowns,
+    UTC preparation timestamp and intended archive path using the agreed date precedence.
+  - Missing, malformed, competing and cross-part sidecars are reported unresolved;
+    unsupported files and intended-path collisions are visible.
+- id: T-03
+  outcome: Deliver an integrated CLI inspection and document observable contracts.
+  depends_on:
+  - T-02
+  done_when:
+  - CLI accepts batch inputs and roots, displays records and diagnostics, and returns
+    nonzero on staging failure; a mixed fixture demonstrates the entire flow.
+  - Update CLI and data-model contracts to describe inputs, outputs, unknowns and
+    failure behavior.
+verification:
+- id: V-01
+  criterion: Extraction preserves the source hierarchy and reports failures without
+    removing source media.
+  method: automated
+  check: 'Automated nested ZIP and folder fixtures, multiple parts, traversal, collisions,
+    links, overlap, malformed ZIP and injected I/O failure: verify hierarchy, diagnostics,
+    incomplete state and unchanged input bytes; run CLI mixed-batch integration. Include
+    a staging ancestor junction or symlink aliasing a source and assert rejection
+    before any writes.'
+- id: V-02
+  criterion: Each recognized item shows available metadata, explicit unknowns, intended
+    archive location and processing timestamps.
+  method: automated
+  check: Automated mixed media fixtures covering supported and unsupported extensions,
+    unique sidecar and preserved fields, missing/malformed/competing and cross-part
+    sidecars, valid metadata and filename dates, invalid/multiple dates, Unknown,
+    timestamps and prospective-path collisions; run CLI integration. Assert exact
+    expected UTC year for valid Unix-second metadata, filename fallback for missing,
+    zero, malformed or out-of-range timestamp, and Unknown when both fail.
+open_questions: []
+review:
+  status: signed_off
+  report: context/changes/s01-inspect-takeout-batch/plan-review.yaml
+  plan_digest: 00916a1eced809f598f0a65d07f73645a2afd33378525bb38d1ec87210fa887b
+  user_approval: confirmed
+  dispositions:
+  - finding_id: R-01
+    disposition: fixed
+    rationale: Specified UTC Unix-seconds parsing, consistent fallback and exact expected-year
+      tests.
+    changed_paths:
+    - context\changes\s01-inspect-takeout-batch\plan.yaml
+  - finding_id: R-02
+    disposition: fixed
+    rationale: Reject reparse points in all existing path components and check canonical
+      path overlap before staging; added ancestor alias test.
+    changed_paths:
+    - context\changes\s01-inspect-takeout-batch\plan.yaml
+design:
+  components:
+  - name: Core batch inspection
+    responsibility: Validate and stage inputs, enumerate media and sidecars, associate
+      only safe matches and produce item records and diagnostics.
+    touchpoints:
+    - src/MediaArchive.Core/
+  - name: CLI inspection command
+    responsibility: Accept input paths, fresh staging parent and prospective archive
+      root; display structured item records and diagnostics, set exit status.
+    touchpoints:
+    - src/MediaArchive.CLI/Program.cs
+    - context/contracts/cli-interface.md
+    - context/contracts/data-model.md
+  data_flow:
+  - CLI input paths and roots -> validate separation -> fresh isolated batch directory
+    -> copy folder inputs and extract ZIPs into per-input roots -> enumerate recognized
+    media and sidecars -> associate and prepare records -> display results and diagnostics.
+  - The intended path is prospective archive root / year or Unknown / original filename;
+    report collisions rather than assuming uniqueness. No archive writes or source
+    cleanup.
+  contracts:
+  - boundary: CLI to Core
+    input: One or more ZIP or directory paths, staging parent, prospective archive
+      root.
+    output: Batch status, per-input failures and per-item source-relative path, media
+      type, available associated sidecar JSON, explicit unknowns, intended path and
+      UTC preparation timestamp.
+  - boundary: Metadata association
+    input: Media and sidecars within each staged input directory.
+    output: Associate only when parsed JSON title exactly equals a same-directory
+      media basename and exactly one sidecar and one media claim that title; preserve
+      all available JSON fields, report malformed, missing, competing and cross-part
+      candidates unresolved.
+  - boundary: Date selection
+    input: Unambiguous sidecar photoTakenTime.timestamp and media filename.
+    output: Parse timestamp as integer Unix seconds in UTC, require valid representable
+      date and use its UTC year. If missing, malformed, zero or out of range, try
+      the specified filename token rule; only if that fails use Unknown. Preserve
+      raw metadata and diagnostic.
+  failure_semantics:
+  - case: Unsafe path, duplicate destination, source overlap, reparse point, malformed
+      ZIP, I/O failure or interrupted staging
+    behavior: Reject or report failure with input identity; never delete or overwrite
+      source; mark batch incomplete and do not present it as fully inspected. Retry
+      uses a new isolated staging directory; partial output remains for manual inspection.
+  - case: Missing, invalid or ambiguous metadata or date
+    behavior: Report diagnostics and explicit unknown metadata values; if metadata
+      date is unusable try filename date, then use Unknown only when no valid unique
+      filename date exists; continue other items without guessing associations.
+  - case: Staging security
+    behavior: Before creating staging, reject any existing path component of every
+      source, staging parent and archive root that is a symlink or reparse point,
+      including ancestors; canonicalize absolute paths and reject equal, ancestor
+      or descendant overlaps between any source, staging and archive roots. Create
+      a new non-existing staging directory; reject ZIP traversal, absolute paths,
+      links/reparse points and collisions, and never follow directory links when copying.
+      Avoid destructive operations entirely.
+risks:
+- description: Cross-part or unfamiliar sidecars may contain metadata that cannot
+    be safely associated with this sample-backed rule.
+  mitigation: Expose unresolved sidecars and unknown values; retain all staged inputs;
+    do not claim complete matching.
+  blocking: false
+- description: Intended paths can collide and represent a preview, not verified archive
+    locations.
+  mitigation: Report collisions and make no archive writes; actual integration belongs
+    to S-02.
+  blocking: false
+later:
+- item: Broaden metadata association using evidence from full multi-part exports.
+  revisit_when: Additional representative export parts and matching evidence are available.
