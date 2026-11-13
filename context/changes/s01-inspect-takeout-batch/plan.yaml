@@ -89,6 +89,15 @@ tasks:
     UTC preparation timestamp and intended archive path using the agreed date precedence.
   - Missing, malformed, competing and cross-part sidecars are reported unresolved;
     unsupported files and intended-path collisions are visible.
+  execution:
+    status: done
+    checks:
+    - name: scripts/test.ps1
+      result: passed
+      evidence: Build succeeded with 0 warnings/errors; all 23 tests passed, 0 skipped.
+        BatchInspector fixtures verify sidecar field preservation and associations,
+        unknowns, UTC metadata year/fallback, unsupported types, collisions, and unresolved
+        metadata diagnostics.
 - id: T-03
   outcome: Deliver an integrated CLI inspection and document observable contracts.
   depends_on:
