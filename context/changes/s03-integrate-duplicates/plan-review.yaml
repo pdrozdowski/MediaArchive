@@ -1,0 +1,92 @@
+﻿schema_version: 1
+change_id: s03-integrate-duplicates
+review_round: 1
+plan_path: context/changes/s03-integrate-duplicates/plan.yaml
+plan_digest: 806aaa2b1a4442f31e3e96aa5957c912fd02025ddc4e6d0cd596fecd5a4c5056
+verdict: pass
+sources:
+  roadmap: context/foundation/roadmap.yaml
+  prd: context/foundation/prd.yaml
+  research: context/changes/s03-integrate-duplicates/research.yaml
+requirement_coverage:
+  - ref: FR-003
+    assessment: covered
+    scoped_obligation: Identify duplicate content and associate it only with freshly verified archive content, preserving sources; cleanup is later scope.
+    tasks: [T-01, T-03]
+    verification: [V-01]
+    evidence: prd.yaml FR-003; plan.yaml T-01 and V-01; roadmap S-03
+  - ref: FR-010
+    assessment: covered
+    scoped_obligation: Persist source-specific original metadata and provenance in the local catalog and support duplicate lookup across restarts.
+    tasks: [T-01, T-02, T-03]
+    verification: [V-01, V-02]
+    evidence: prd.yaml FR-010; plan.yaml T-02 and V-02; roadmap S-03
+  - ref: US-01
+    assessment: covered
+    scoped_obligation: Associate duplicates with verified content without another file and retain each distinct available metadata value and source association; phone and cloud cleanup, report and resume are outside S-03.
+    tasks: [T-01, T-02, T-03]
+    verification: [V-01, V-02]
+    evidence: prd.yaml US-01 duplicate and metadata acceptance criteria; plan.yaml T-01 through T-03
+  - ref: US-02
+    assessment: covered
+    scoped_obligation: Persist catalog associations and available original metadata across restart and staging removal; full repeat, resume, tags and cleanup handling are outside S-03.
+    tasks: [T-02, T-03]
+    verification: [V-02]
+    evidence: prd.yaml US-02 catalog persistence acceptance; plan.yaml T-02 and V-02; roadmap S-04
+acceptance_checks:
+  - task_id: T-01
+    criterion_index: 0
+    assessment: pass
+    given: Identical sources with matching catalog or earlier batch content, including same or different paths and years.
+    when: Integrate each source.
+    then: Source hash and size select candidates; independently rehash safe candidate and reuse verified archive path without a new file.
+  - task_id: T-01
+    criterion_index: 1
+    assessment: pass
+    given: New content and an occupied destination with different content.
+    when: Integrate each source.
+    then: New content is copied and independently verified; occupied destination is not overwritten and reports failure.
+  - task_id: T-01
+    criterion_index: 2
+    assessment: pass
+    given: Malformed or unreadable catalog, or matching candidates missing, altered, unsafe or unreadable.
+    when: Integrate a source.
+    then: Catalog read failure prevents writes; if no matching candidate verifies, source fails closed and is preserved.
+  - task_id: T-02
+    criterion_index: 0
+    assessment: pass
+    given: Two verified sources with distinct sidecars and an existing version 1 catalog.
+    when: Persist and reload their associations.
+    then: Each record retains its own metadata, provenance and attributes and shares the verified path and hash; existing records remain readable.
+  - task_id: T-02
+    criterion_index: 1
+    assessment: pass
+    given: A verified association and an injected catalog publication failure.
+    when: Save the catalog.
+    then: Report affected unpersisted associations, preserve previous catalog and original and staged sources, and return failure.
+  - task_id: T-02
+    criterion_index: 2
+    assessment: pass
+    given: Persisted records for distinct sources sharing content.
+    when: Browse after restart.
+    then: Display input path and relative path for each record alongside its metadata.
+  - task_id: T-03
+    criterion_index: 0
+    assessment: pass
+    given: Duplicate sources with different metadata, names and years, in one batch and across restart.
+    when: Run the end-to-end tests.
+    then: Assert one media file, verified hashes and individually attributable persisted records.
+  - task_id: T-03
+    criterion_index: 1
+    assessment: pass
+    given: Collisions, invalid candidates, malformed catalog, copy or verification and catalog write failures.
+    when: Run failure tests.
+    then: Assert diagnostics, no false success or overwrite, intact sources and retained prior records.
+  - task_id: T-03
+    criterion_index: 2
+    assessment: pass
+    given: Implemented association behavior and existing CLI and data model contracts.
+    when: Update contracts and run scripts/test.ps1.
+    then: Contracts reflect behavior and the solution builds and tests pass.
+findings: []
+summary: The plan covers both S-03 completion criteria and supplies executable positive and failure checks. Review is against the plan only; implementation and product tests have not been run.

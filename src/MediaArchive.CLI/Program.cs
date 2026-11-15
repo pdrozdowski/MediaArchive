@@ -20,7 +20,7 @@ internal static class InspectionCommand
             {
                 var catalog = ArchiveCatalogStore.Read(args[2]);
                 foreach (var item in catalog.Items)
-                    Console.WriteLine($"Item: {item.MediaType} | year={item.Year} | archive={item.ArchivePath} | file={item.FileName} | sha256={item.Sha256} | width={item.Attributes.Width?.ToString() ?? "Unknown"} | height={item.Attributes.Height?.ToString() ?? "Unknown"} | duration={item.Attributes.DurationSeconds?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Unknown"} | fps={item.Attributes.FramesPerSecond?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Unknown"} | unknown={string.Join(",", item.Unknowns)} | metadata={item.OriginalMetadata?.GetRawText() ?? "Unknown"}");
+                    Console.WriteLine($"Item: {item.MediaType} | input={item.InputPath} | source={item.RelativePath} | year={item.Year} | archive={item.ArchivePath} | file={item.FileName} | sha256={item.Sha256} | width={item.Attributes.Width?.ToString() ?? "Unknown"} | height={item.Attributes.Height?.ToString() ?? "Unknown"} | duration={item.Attributes.DurationSeconds?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Unknown"} | fps={item.Attributes.FramesPerSecond?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Unknown"} | unknown={string.Join(",", item.Unknowns)} | metadata={item.OriginalMetadata?.GetRawText() ?? "Unknown"}");
                 return 0;
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or System.Text.Json.JsonException)

@@ -24,7 +24,7 @@ MediaArchive.CLI archive --input <zip-or-folder> [--input <zip-or-folder> ...] \
   --staging-parent <path> --staging-name <new-directory-name> --archive-root <path>
 ```
 
-The command stages and inspects the batch, copies recognized media into `<archive-root>/<year-or-Unknown>/<filename>`, computes SHA-256 independently for staged source and archived copy, and prints `Verified` lines only for matching content. It writes the local catalog after successful verification. It does not overwrite existing media files or remove source or staging files. Incomplete staging prevents archive integration. Copy, collision, verification, and catalog errors are written to stderr and return 1; invalid arguments return 2. Unavailable media probing is reported as a warning and fields remain explicitly unknown.
+The command stages and inspects the batch, hashes recognized staged sources with SHA-256, and checks their size and hash against catalog candidates and earlier verified items in the batch. A duplicate is associated with an existing archive file only after its current bytes are freshly hashed and verified; no second media file is created. Otherwise, the command copies new media into `<archive-root>/<year-or-Unknown>/<filename>` and independently hashes the source and destination. It prints `Verified` lines only for newly copied or duplicate-associated content whose archived bytes match. Each source occurrence is retained as its own catalog entry with its metadata and provenance, even when entries share one archive path. It does not overwrite existing media files or remove source or staging files. Incomplete staging or malformed/unreadable catalog prevents archive integration. Copy, candidate, collision, verification, and catalog errors are written to stderr and return 1; invalid arguments return 2. Unavailable media probing is reported as a warning and fields remain explicitly unknown.
 
 ## Browse the local catalog
 
@@ -32,4 +32,4 @@ The command stages and inspects the batch, copies recognized media into `<archiv
 MediaArchive.CLI browse --archive-root <path>
 ```
 
-Reads the persisted catalog without staging a batch and prints each archived item, including year, path, hash, unknown fields, and available original sidecar metadata. Returns 0 when the catalog is readable and 1 when it is malformed or inaccessible. An absent catalog is an empty catalog.
+Reads the persisted catalog without staging a batch and prints each source association, including input identity, source-relative path, year, archive path, hash, unknown fields, and available original sidecar metadata. Duplicate sources appear as separate entries and may share an archive path. Returns 0 when the catalog is readable and 1 when it is malformed or inaccessible. An absent catalog is an empty catalog.

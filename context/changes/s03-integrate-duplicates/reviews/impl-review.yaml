@@ -1,0 +1,68 @@
+﻿schema_version: 1
+change_id: s03-integrate-duplicates
+plan_path: context/changes/s03-integrate-duplicates/plan.yaml
+plan_digest: 806aaa2b1a4442f31e3e96aa5957c912fd02025ddc4e6d0cd596fecd5a4c5056
+scope:
+  tasks: [T-01, T-02, T-03]
+  git_baseline: 1be7854a4645903cfa68767f621f78f25c2aee16
+  git_head: 1be7854a4645903cfa68767f621f78f25c2aee16
+  reviewed_paths:
+    - src/MediaArchive.Core/ArchiveCopier.cs
+    - src/MediaArchive.Core/ArchiveCatalogIntegrator.cs
+    - src/MediaArchive.Core/ArchiveCatalog.cs
+    - src/MediaArchive.CLI/Program.cs
+    - tests/MediaArchive.Tests/ArchiveDuplicateTests.cs
+    - tests/MediaArchive.Tests/ArchiveCatalogTests.cs
+    - tests/MediaArchive.Tests/CliInspectionTests.cs
+    - context/contracts/data-model.md
+    - context/contracts/cli-interface.md
+    - .agents/skills/20x-implement/AGENTS.md
+    - tests/MediaArchive.Tests/AGENTS.md
+verdict: approved
+review_round: 1
+reviewers:
+  acceptance: completed
+  engineering: completed
+checks:
+  - command: .\scripts\test.ps1
+    result: passed
+    evidence: Build succeeded with 0 warnings and errors; 54 tests passed, 0 failed, exit code 0.
+  - command: python -m unittest discover -s .agents/skills/20x-impl-review/tests -v
+    result: passed
+    evidence: 12 implementation-review skill tests passed, exit code 0.
+  - command: Focused independent review of candidate fallback test and implementation
+    result: passed
+    evidence: Both acceptance and engineering re-auditors confirmed the test exercises missing-then-valid candidates and proves verified path reuse, one file and source preservation.
+dimensions:
+  plan_adherence: pass
+  scope_discipline: pass
+  safety_quality: pass
+  architecture: pass
+  pattern_consistency: pass
+  success_criteria: pass
+findings:
+  - id: F-01
+    severity: low
+    impact: low
+    dimension: success_criteria
+    target: tests/MediaArchive.Tests/ArchiveDuplicateTests.cs:130
+    source_ref: plan.tasks.T-01.done_when[2]
+    evidence: Initial failure fixtures tested one invalid matching candidate at a time, leaving the documented behavior of continuing to a later valid candidate without a direct assertion.
+    reproduction: Have catalog list a missing candidate followed by a valid candidate matching source size and hash; call ArchiveCopier.Copy and inspect result and archive files.
+    recommended_fix: Add a regression test that asserts the later valid candidate is selected, no second file is created, sources are intact, and existing catalog entries remain unchanged.
+    status: verified
+    rounds_seen: [0, 1]
+    verification: Added InvalidMatchingCatalogCandidateFallsBackToLaterVerifiedCandidate; focused test passed, full suite passed, and two fresh independent reviewers confirmed the assertions and implementation match the plan.
+history:
+  - round: 0
+    outcome: Both independent reviewers found no blocking correctness defect; acceptance audit identified one nonblocking candidate-fallback coverage gap.
+    checks:
+      - .\scripts\test.ps1: passed, 53 tests.
+    commits: []
+  - round: 1
+    outcome: Added and independently re-audited a focused missing-then-valid candidate fallback test; zero unresolved MEDIUM+ findings.
+    checks:
+      - .\scripts\test.ps1: passed, 54 tests.
+      - python -m unittest discover -s .agents/skills/20x-impl-review/tests -v: passed, 12 tests.
+    commits: []
+summary: S-03 implementation meets its signed-off duplicate integration and source provenance criteria. Matching archive candidates are freshly verified, distinct source metadata remains attached to separate catalog entries, and candidate fallback now has direct regression coverage. No unresolved MEDIUM-or-higher findings remain. Worktree contains unrelated and task changes with uncertain commit ownership, so no commit was created.

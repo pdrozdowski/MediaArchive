@@ -1,0 +1,240 @@
+schema_version: 1
+change_id: s03-integrate-duplicates
+status: done
+source:
+  roadmap: context/foundation/roadmap.yaml
+  milestone_id: M-01
+  item_id: S-03
+  prd: context/foundation/prd.yaml
+  research: context/changes/s03-integrate-duplicates/research.yaml
+  refs:
+  - FR-003
+  - FR-010
+  - US-01
+  - US-02
+goal:
+  outcome: The operator can integrate duplicate media without another archive copy
+    or loss of distinct source information.
+  done_when:
+  - Duplicate content is associated with verified archived content without creating
+    another media file.
+  - Distinct available source metadata and provenance remain associated with their
+    sources in the catalog.
+baseline:
+- finding: Copy creates a new destination before independently hashing source and
+    destination; existing or colliding paths fail.
+  evidence: src/MediaArchive.Core/ArchiveCopier.cs
+- finding: Version 1 JSON catalog appends source-specific records with sidecar, paths
+    and hash; CLI calls copier before catalog integration.
+  evidence: src/MediaArchive.Core/ArchiveCatalog.cs; src/MediaArchive.Core/ArchiveCatalogIntegrator.cs;
+    src/MediaArchive.CLI/Program.cs
+- finding: Partial output or verified uncataloged files can remain on failures; S-02
+    preserves sources and fails closed.
+  evidence: tests/MediaArchive.Tests/ArchiveCopyFailureTests.cs; tests/MediaArchive.Tests/ArchiveCatalogTests.cs
+approach:
+  summary: Hash each staged item before creating a destination, locate matching catalog
+    or earlier verified batch content, freshly hash the actual archive candidate,
+    and associate each source with the verified path in the existing catalog. Otherwise
+    preserve the current copy-and-verify flow.
+  reuse:
+  - option: SHA256 stream hashing and existing path protections
+    decision: adapt
+    reason: Existing .NET hashing and containment checks support content identity
+      and verification without a new dependency.
+  - option: Version 1 JSON catalog and source-specific entries
+    decision: adapt
+    reason: Separate records retain metadata and can share an archive path; avoids
+      migration and a new storage dependency. An explicit content-source schema would
+      require migration and consumer changes.
+  - option: Batch inspection and media probing
+    decision: reuse
+    reason: Existing records contain source-specific sidecars, unknowns and attributes
+      needed for catalog entries.
+  decisions:
+  - topic: Catalog representation
+    choice: Keep version 1 entries per source occurrence, sharing the verified archive
+      path and hash for duplicate content; browse continues to display each record.
+    rationale: Preserves all source metadata and existing readers with minimal changes;
+      repeated-association identity and full resumption belong to S-04.
+    authority: agent_proposed
+  - topic: Candidate verification and collisions
+    choice: Use source SHA-256 and size to find catalog or earlier same-batch candidates,
+      then freshly hash a safe archive path before association; do not overwrite a
+      different or unverified existing file.
+    rationale: Stored hashes and names alone do not establish present content integrity.
+    authority: agent_proposed
+  - topic: Source preservation
+    choice: Retain original and staged media and report failures; no cleanup or deletion
+      in this slice.
+    rationale: Inherits existing safety and leaves cleanup to later slices.
+    authority: inherited
+design:
+  components:
+  - name: Core archive integration
+    responsibility: Read catalog before any archive writes, hash and validate sources,
+      select and freshly verify candidate archive files or copy and verify new content;
+      produce source-specific verified associations and diagnostics.
+    touchpoints:
+    - src/MediaArchive.Core/ArchiveCopier.cs
+    - src/MediaArchive.Core/ArchiveCatalogIntegrator.cs
+    - src/MediaArchive.Core/ArchiveCatalog.cs
+  - name: CLI and catalog browsing
+    responsibility: Orchestrate integration and report verified associations and failures;
+      browse preserves source records and makes their provenance visible.
+    touchpoints:
+    - src/MediaArchive.CLI/Program.cs
+    - context/contracts/cli-interface.md
+    - context/contracts/data-model.md
+  data_flow:
+  - Stage and inspect as before; abort integration if staging incomplete or existing
+    catalog is malformed or unreadable.
+  - For each inspected item validate staged containment and reparse protections, compute
+    source size and SHA-256, and search catalog entries plus previously verified results
+    from this batch by size and hash.
+  - For candidates validate archive-root containment and reject reparse points; independently
+    hash actual archive file and compare to source hash. Select a verified candidate
+    deterministically in catalog then batch order, without creating another file;
+    validate each candidate before use.
+  - If no candidate exists, copy with CreateNew to the intended year path and independently
+    verify source and destination as before. Evaluate matching content before rejecting
+    an intended-path collision; distinct content competing for the same path fails
+    without overwrite.
+  - Create an entry for each successfully verified source using its own input path,
+    relative path, sidecar, unknowns, timestamps and attributes, pointing to the selected
+    archive path; publish with existing temporary catalog mechanism and retain prior
+    records.
+  contracts:
+  - boundary: Archive command to Core
+    input: Complete staging and inspection, archive root and readable existing catalog.
+    output: Per-source verified new copy or duplicate association with archive path
+      and SHA-256; diagnostics and nonzero exit on any failed integration or catalog
+      publication.
+  - boundary: Catalog version 1
+    input: Verified source associations and existing records.
+    output: Separate source records with full original metadata and provenance, possibly
+      sharing one archive path and hash; preexisting version 1 catalogs remain readable,
+      and browse exposes input path and relative path alongside metadata.
+  failure_semantics:
+  - case: Catalog malformed, inaccessible or write fails
+    behavior: Fail closed before media writes on read failure; on write failure retain
+      existing catalog and all sources, report each association not persisted and
+      any new verified copy left uncataloged; do not report overall success.
+  - case: Matching candidate missing, modified, unsafe or unreadable
+    behavior: Try other matching candidates in deterministic order; if none verifies,
+      report failure for that source and retain sources without creating a replacement
+      or treating it as verified.
+  - case: Uncataloged existing target, unrelated target collision, interrupted copy
+      or failed hash
+    behavior: Never infer verification from a path, overwrite or delete; report failure
+      and preserve source and prior catalog. Full recovery of uncertain work is S-04.
+  - case: Incomplete staging, unsafe source or archive path, or source read failure
+    behavior: Report per-item or batch failure, never create a verified association
+      for the affected item, and preserve source files.
+tasks:
+- id: T-01
+  outcome: Existing archive flow recognizes and verifies duplicates from persisted
+    catalog and the current batch before creating destinations.
+  done_when:
+  - Source hash and size select candidates, and actual safe candidate files are independently
+    rehashed; matching content reuses one archive path for different names, years
+    and same-path collisions.
+  - New distinct content follows existing copy and independent verification; different
+    content at an occupied destination fails without overwrite.
+  - Malformed or unreadable catalog prevents archive writes; missing, changed, unsafe
+    or unreadable candidates fail closed if no other matching candidate verifies.
+  execution:
+    status: done
+    checks:
+    - name: dotnet build MediaArchive.sln --no-restore --disable-build-servers -m:1
+        -v minimal; dotnet test tests/MediaArchive.Tests/MediaArchive.Tests.csproj
+        --no-restore --disable-build-servers -m:1 -v quiet
+      result: passed
+      evidence: Build passed with 0 warnings/errors; 46 tests passed. T-01 focused
+        tests cover same-batch duplicate reuse, same-path distinct content preservation
+        and malformed catalog fail-closed.
+- id: T-02
+  outcome: Each verified duplicate retains its source-specific metadata and provenance
+    in the existing catalog.
+  depends_on:
+  - T-01
+  done_when:
+  - Version 1 records from each source retain full associated sidecar, unknowns, source
+    input and relative path, attributes and verified shared archive path and hash,
+    while previous records remain readable.
+  - Catalog publication failure reports affected unpersisted associations and preserves
+    prior catalog and original and staged files; no overall success is reported.
+  - Browse displays source input and relative path with each record so distinct metadata
+    can be attributed after restart.
+  execution:
+    status: done
+    checks:
+    - name: dotnet build MediaArchive.sln --no-restore --disable-build-servers -m:1
+        -v minimal; dotnet test tests/MediaArchive.Tests/MediaArchive.Tests.csproj
+        --no-restore --disable-build-servers -m:1 -v quiet
+      result: passed
+      evidence: Build passed with 0 warnings/errors; all 48 tests passed. Added catalog
+        integration retaining separate metadata/provenance records for a shared archive
+        path and fresh-process browse assertions for input and relative source paths.
+- id: T-03
+  outcome: Integrated duplicate workflow, safety cases and contracts are verified.
+  depends_on:
+  - T-02
+  done_when:
+  - Automated end-to-end tests cover duplicate sources in one batch and across restart
+    with differing metadata, names and years, one media file, correct verified hashes
+    and individually attributable persisted records.
+  - Automated failure tests cover same-path different content, stale missing changed
+    unreadable or unsafe candidates, malformed catalog, copy or verification failure
+    and catalog write failure; assert diagnostics, no false success or overwrite and
+    intact sources and prior records.
+  - Update CLI and data-model contracts to reflect associations and run the solution
+    build and tests with scripts/test.ps1.
+  execution:
+    status: done
+    checks:
+    - name: dotnet build MediaArchive.sln --no-restore --disable-build-servers -m:1
+        -v minimal; dotnet test MediaArchive.sln --no-build --no-restore --disable-build-servers
+        -m:1 -v quiet; python -m unittest discover -s .agents/skills/20x-implement/tests
+        -v
+      result: passed
+      evidence: 'Independent verification passed: solution build 0 warnings/errors;
+        all 53 .NET tests passed; all 19 implementation skill tests passed. T-03 end-to-end
+        duplicate-across-restart test, invalid candidate failure theory, and CLI/data-model
+        contract updates are present.'
+verification:
+- id: V-01
+  criterion: Duplicate content is associated with verified archived content without
+    creating another media file.
+  method: automated
+  check: Exercise same-batch and restart duplicates including matching and differing
+    intended paths; assert one media file and matching freshly verified hashes, and
+    inject stale candidates and destination collisions to assert failure and preservation.
+- id: V-02
+  criterion: Distinct available source metadata and provenance remain associated with
+    their sources in the catalog.
+  method: automated
+  check: Archive byte-identical sources with distinct sidecars and input paths, remove
+    staging and browse in a fresh process; assert each metadata object and source
+    association survive and reference the same archive file; inject catalog write
+    failure.
+risks:
+- description: Catalog and media writes are separate operations and an interrupted
+    or failed update can leave an uncataloged file.
+  mitigation: Report uncataloged results, retain sources and do not infer success
+    or overwrite; S-04 addresses full recovery.
+  blocking: false
+- description: Separate records mean browse counts source associations, not unique
+    media files.
+  mitigation: Preserve existing version 1 format and display provenance; distinguish
+    the shared archive path.
+  blocking: false
+later:
+- item: Stable source identity and idempotent association of repeated processing.
+  revisit_when: S-04 resume and repeat planning.
+open_questions: []
+review:
+  status: signed_off
+  report: context/changes/s03-integrate-duplicates/plan-review.yaml
+  plan_digest: 806aaa2b1a4442f31e3e96aa5957c912fd02025ddc4e6d0cd596fecd5a4c5056
+  user_approval: confirmed
+  dispositions: []

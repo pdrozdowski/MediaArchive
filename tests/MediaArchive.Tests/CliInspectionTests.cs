@@ -23,6 +23,42 @@ public sealed class CliInspectionTests
     }
 
     [Fact]
+    public void BrowseShowsEachSourceForSharedArchivedContentAfterRestart()
+    {
+        using var temp = new TemporaryDirectory();
+        var archive = Path.Combine(temp.Path, "archive");
+        var sharedPath = Path.Combine(archive, "2020", "photo.jpg");
+        Directory.CreateDirectory(Path.GetDirectoryName(sharedPath)!);
+        File.WriteAllBytes(sharedPath, [1, 2, 3]);
+        using var firstMetadata = System.Text.Json.JsonDocument.Parse("{\"source\":\"first\"}");
+        using var secondMetadata = System.Text.Json.JsonDocument.Parse("{\"source\":\"second\"}");
+        var first = new ArchiveCatalogEntry("takeout-a.zip", "Takeout/a/photo.jpg", "photo.jpg", "photo", "2020", sharedPath,
+            firstMetadata.RootElement.Clone(), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, 3,
+            Convert.ToHexString(SHA256.HashData([1, 2, 3])).ToLowerInvariant(), new(null, null, null, null), ["width"]);
+        var second = first with { InputPath = "takeout-b.zip", RelativePath = "Takeout/b/photo.jpg", OriginalMetadata = secondMetadata.RootElement.Clone() };
+        ArchiveCatalogStore.Save(archive, [first, second]);
+
+        var cliAssembly = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/MediaArchive.CLI/bin/Debug/net10.0/MediaArchive.CLI.dll"));
+        var start = new ProcessStartInfo("dotnet") { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        start.ArgumentList.Add(cliAssembly);
+        start.ArgumentList.Add("browse");
+        start.ArgumentList.Add("--archive-root");
+        start.ArgumentList.Add(archive);
+        using var browse = Process.Start(start)!;
+        var output = browse.StandardOutput.ReadToEnd();
+        var error = browse.StandardError.ReadToEnd();
+        browse.WaitForExit();
+
+        Assert.Equal(0, browse.ExitCode);
+        Assert.Empty(error);
+        Assert.Equal(2, output.Split("Item:", StringSplitOptions.RemoveEmptyEntries).Length);
+        Assert.Contains("input=takeout-a.zip | source=Takeout/a/photo.jpg", output);
+        Assert.Contains("input=takeout-b.zip | source=Takeout/b/photo.jpg", output);
+        Assert.Contains("metadata=", output);
+        Assert.Equal(sharedPath, Assert.Single(ArchiveCatalogStore.Read(archive).Items, x => x.InputPath == "takeout-a.zip").ArchivePath);
+    }
+
+    [Fact]
     public void InspectCommandStagesMixedBatchAndDisplaysRecordsAndDiagnostics()
     {
         using var temp = new TemporaryDirectory();
@@ -122,6 +158,43 @@ public sealed class CliInspectionTests
         Assert.Contains(Path.Combine(archive, "2020", "photo-20200102.jpg"), secondError);
         Assert.Equal(new byte[] { 1, 2, 3 }, File.ReadAllBytes(Path.Combine(archive, "2020", "photo-20200102.jpg")));
         Assert.Equal(new byte[] { 9 }, File.ReadAllBytes(Path.Combine(temp.Path, "stage", "run-2", "input-0001", "photo-20200102.jpg")));
+    }
+
+    [Fact]
+    public void ArchiveCommandAssociatesDuplicateSourceAcrossRestartWithoutSecondMediaFile()
+    {
+        using var temp = new TemporaryDirectory();
+        var firstInput = Directory.CreateDirectory(Path.Combine(temp.Path, "takeout-a")).FullName;
+        var secondInput = Directory.CreateDirectory(Path.Combine(temp.Path, "takeout-b")).FullName;
+        var firstMedia = Path.Combine(firstInput, "first-20200102.jpg");
+        var secondMedia = Path.Combine(secondInput, "second-20240203.jpg");
+        var bytes = new byte[] { 1, 2, 3, 4 };
+        File.WriteAllBytes(firstMedia, bytes);
+        File.WriteAllBytes(secondMedia, bytes);
+        File.WriteAllText(Path.Combine(firstInput, "first-20200102.jpg.json"), "{\"title\":\"first-20200102.jpg\",\"album\":\"A\"}");
+        File.WriteAllText(Path.Combine(secondInput, "second-20240203.jpg.json"), "{\"title\":\"second-20240203.jpg\",\"album\":\"B\"}");
+        var archive = Path.Combine(temp.Path, "archive");
+
+        var (firstExit, _, firstError) = RunWithConsole(["archive", "--input", firstInput,
+            "--staging-parent", Path.Combine(temp.Path, "stage"), "--staging-name", "run-1", "--archive-root", archive]);
+        var (secondExit, secondOutput, secondError) = RunWithConsole(["archive", "--input", secondInput,
+            "--staging-parent", Path.Combine(temp.Path, "stage"), "--staging-name", "run-2", "--archive-root", archive]);
+
+        Assert.Equal(0, firstExit);
+        Assert.Equal(0, secondExit);
+        Assert.DoesNotContain("archive-copy-failed", firstError);
+        Assert.DoesNotContain("archive-copy-failed", secondError);
+        Assert.Contains("Verified:", secondOutput);
+        Assert.Single(Directory.GetFiles(archive, "*.jpg", SearchOption.AllDirectories));
+        var records = ArchiveCatalogStore.Read(archive).Items;
+        Assert.Equal(2, records.Count);
+        Assert.Equal(new[] { "A", "B" }, records.Select(x => x.OriginalMetadata!.Value.GetProperty("album").GetString()));
+        Assert.Equal(new[] { "first-20200102.jpg", "second-20240203.jpg" }, records.Select(x => x.FileName));
+        Assert.Equal(records[0].ArchivePath, records[1].ArchivePath);
+        Assert.All(records, item => Assert.Equal(Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant(), item.Sha256));
+        Assert.Equal(bytes, File.ReadAllBytes(firstMedia));
+        Assert.Equal(bytes, File.ReadAllBytes(secondMedia));
+        Assert.Equal(bytes, File.ReadAllBytes(Path.Combine(temp.Path, "stage", "run-2", "input-0001", "second-20240203.jpg")));
     }
 
     [Fact]

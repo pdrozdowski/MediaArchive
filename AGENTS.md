@@ -19,6 +19,8 @@ Run these PowerShell scripts from the repository root:
 - `.\scripts\buildRun.ps1` builds the solution, then forwards remaining arguments to `MediaArchive.CLI`.
 - `.\scripts\run.ps1` launches the already-built Debug CLI and forwards remaining arguments; it does not build.
 
+When running `dotnet test` directly, include `--disable-build-servers`; test runs may hang without it in this environment. The repository test script already supplies this option.
+
 ## Architecture Contracts
 
 The following files are placeholders for contracts that will be documented as the corresponding behavior is established. Follow them when they contain guidance, and update them with tests when changing an established contract.

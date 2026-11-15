@@ -1,5 +1,6 @@
 using MediaArchive.Core;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace MediaArchive.Tests;
 
@@ -171,6 +172,50 @@ public sealed class ArchiveCatalogTests
 
             var catalog = ArchiveCatalogStore.Read(root);
             Assert.Equal(new[] { "first.jpg", "second.jpg" }, catalog.Items.Select(x => x.FileName));
+        }
+        finally { Directory.Delete(root, recursive: true); }
+    }
+
+    [Fact]
+    public void CatalogIntegrationRetainsDistinctMetadataForSourcesSharingVerifiedArchivePath()
+    {
+        var root = TempRoot();
+        try
+        {
+            var archive = Path.Combine(root, "archive");
+            var inputA = Path.Combine(root, "takeout-a.zip");
+            var inputB = Path.Combine(root, "takeout-b.zip");
+            var stagedA = Path.Combine(root, "staged-a");
+            var stagedB = Path.Combine(root, "staged-b");
+            Directory.CreateDirectory(stagedA);
+            Directory.CreateDirectory(stagedB);
+            var bytes = new byte[] { 1, 2, 3 };
+            File.WriteAllBytes(Path.Combine(stagedA, "a.jpg"), bytes);
+            File.WriteAllBytes(Path.Combine(stagedB, "b.jpg"), bytes);
+            using var metadataA = System.Text.Json.JsonDocument.Parse("{\"source\":\"album-a\"}");
+            using var metadataB = System.Text.Json.JsonDocument.Parse("{\"source\":\"album-b\"}");
+            var sharedPath = Path.Combine(archive, "2020", "a.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(sharedPath)!);
+            File.WriteAllBytes(sharedPath, bytes);
+            var itemA = new InspectedMediaItem(inputA, "a.jpg", "photo", metadataA.RootElement.Clone(), ["sidecar-note-a"], "2020", sharedPath, DateTimeOffset.UtcNow, false);
+            var itemB = new InspectedMediaItem(inputB, "b.jpg", "photo", metadataB.RootElement.Clone(), ["sidecar-note-b"], "2024", sharedPath, DateTimeOffset.UtcNow, false);
+            var staging = new BatchStagingResult(Path.Combine(root, "stage"), [new(inputA, stagedA, true, null), new(inputB, stagedB, true, null)]);
+            var inspection = new BatchInspectionResult([itemA, itemB], [], [], DateTimeOffset.UtcNow);
+            var sha = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+            var copies = new ArchiveCopyResult([new(inputA, "a.jpg", sharedPath, sha), new(inputB, "b.jpg", sharedPath, sha)], []);
+
+            var result = new ArchiveCatalogIntegrator(new MediaProbe(_ => "{}")).Integrate(staging, inspection, copies, archive);
+
+            Assert.Empty(result.Diagnostics);
+            var records = ArchiveCatalogStore.Read(archive).Items;
+            Assert.Equal(2, records.Count);
+            Assert.Equal(new[] { inputA, inputB }, records.Select(x => x.InputPath));
+            Assert.Equal(new[] { "a.jpg", "b.jpg" }, records.Select(x => x.RelativePath));
+            Assert.Equal(new[] { "album-a", "album-b" }, records.Select(x => x.OriginalMetadata!.Value.GetProperty("source").GetString()));
+            Assert.Contains("sidecar-note-a", records[0].Unknowns);
+            Assert.Contains("sidecar-note-b", records[1].Unknowns);
+            Assert.All(records, record => Assert.Equal(sharedPath, record.ArchivePath));
+            Assert.All(records, record => Assert.Equal(sha, record.Sha256));
         }
         finally { Directory.Delete(root, recursive: true); }
     }

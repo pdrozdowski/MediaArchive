@@ -1,0 +1,110 @@
+﻿schema_version: 1
+change_id: s03-integrate-duplicates
+status: complete
+source:
+  roadmap: context/foundation/roadmap.yaml
+  item_id: S-03
+  prd: context/foundation/prd.yaml
+  refs: [FR-003, FR-010, US-01, US-02]
+questions:
+  - id: Q-01
+    question: How can existing verification and catalog facilities support duplicate content while preserving distinct source information?
+    why: Matching must avoid another media copy without trusting a stale catalog or discarding provenance.
+    status: answered
+findings:
+  - id: F-01
+    question_id: Q-01
+    statement: The copier creates each destination before hashing source and destination independently; it rejects intended-path collisions and existing destinations, and does not consult the catalog. Identical content with different destinations is therefore copied again, while a same-path duplicate fails.
+    confidence: verified
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCopier.cs ArchiveCopier.Copy
+        note: Inspected collision check, CreateNew, SHA256.HashData and verified result creation.
+      - kind: repository
+        reference: src/MediaArchive.CLI/Program.cs InspectionCommand.Run
+        note: Archive calls Copy before catalog integration.
+  - id: F-02
+    question_id: Q-01
+    statement: Version 1 catalog entries contain source input and relative paths, complete available sidecar JSON, unknowns, archive path, size and SHA-256. Save appends entries and retains earlier records; multiple source records can refer to one archive path, but there is no explicit content-to-sources model or duplicate lookup.
+    confidence: verified
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCatalog.cs ArchiveCatalogEntry and ArchiveCatalogStore.Save
+        note: Inspected fields, schema validation and append-only publication.
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCatalogIntegrator.cs ArchiveCatalogIntegrator.Integrate
+        note: Builds records only from verified copies, preserving each inspected sidecar and source identity.
+  - id: F-03
+    question_id: Q-01
+    statement: A recorded hash reflects verification at copy time, not a fresh check of the current archive file. A candidate may be missing, changed or unreadable; partial destinations and verified but uncataloged files can also remain after failures.
+    confidence: verified
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCopier.cs ArchiveCopier.Copy
+        note: Hashes destination during copy only; failures can leave output behind.
+      - kind: repository
+        reference: tests/MediaArchive.Tests/ArchiveCopyFailureTests.cs CopyFailuresPreserveSourcesAndNeverProduceVerifiedCatalogEntry
+        note: Exercises read, partial write and mismatch failures with source preservation.
+      - kind: repository
+        reference: tests/MediaArchive.Tests/ArchiveCatalogTests.cs CatalogWriteFailureReportsVerifiedCopyAsUncatalogedAndKeepsOldCatalog
+        note: Exercises catalog-write failure after a verified copy.
+  - id: F-04
+    question_id: Q-01
+    statement: Inspection flags intended-path collisions based on paths, while source metadata and year can differ for byte-identical media. Path collision alone cannot establish content identity, and distinct content at the same path must not be overwritten.
+    confidence: supported
+    evidence:
+      - kind: documentation
+        reference: context/contracts/data-model.md Inspected media item and Sidecar association and dates
+        note: Year and intended path derive from per-source metadata or filename; collision is a path flag.
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCopier.cs ArchiveCopier.Copy
+        note: Uses collision flag and CreateNew to prevent overwrites.
+  - id: F-05
+    question_id: Q-01
+    statement: Existing platform SHA-256 stream hashing and JSON catalog storage provide the primitives for a content lookup and source associations without a new dependency; hash equality alone does not verify the present destination or make catalog and file writes atomic.
+    confidence: supported
+    evidence:
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCopier.cs ArchiveCopier.Copy
+        note: Existing SHA256.HashData stream use and independent verification.
+      - kind: repository
+        reference: src/MediaArchive.Core/ArchiveCatalog.cs ArchiveCatalogStore.Save
+        note: Serializes a temporary catalog then moves it over the target; separate from media copying.
+options:
+  - topic: Representing duplicate source information
+    candidates:
+      - name: Reuse version 1 source records referencing one archive path
+        disposition: viable
+        reason: Preserves individual metadata with minimal migration, but browse counts records as items and the content-to-source relationship is implicit.
+      - name: Introduce explicit content and source associations
+        disposition: viable
+        reason: Makes one-to-many identity clear, but requires schema compatibility or migration and updates to catalog consumers.
+  - topic: Recognizing a duplicate
+    candidates:
+      - name: Match source hash to a catalog candidate and freshly verify its archive file
+        disposition: recommend
+        reason: Reuses existing hashing and checks actual archived bytes before association; same-batch verified results also need to become candidates.
+      - name: Trust catalog hash or filename alone
+        disposition: reject
+        reason: A stored hash can be stale and a name or path does not establish equal content.
+recommendations:
+  - decision: Plan duplicate detection before destination creation, including same-batch and persisted candidates, fresh destination verification, and explicit failure handling for missing, changed or unreadable candidates.
+    basis: [F-01, F-03, F-04, F-05]
+    owner: plan
+  - decision: Choose and test a catalog representation that retains each source and its full available metadata, supports existing version 1 catalogs, and reports persistence failures without claiming successful integration.
+    basis: [F-02, F-03, F-05]
+    owner: plan
+  - decision: Specify behavior for different content competing for a destination, multiple matching candidates, and verified uncataloged files; do not overwrite or infer verification from a path.
+    basis: [F-01, F-03, F-04]
+    owner: plan
+open_questions:
+  - question: What stable source identity should distinguish a genuinely separate source from a repeated processing of the same source?
+    impact: Planning must define association semantics and coordinate repeat and resume behavior with S-04; input path alone may not uniquely identify an enduring source.
+    blocking: false
+handoff:
+  summary: Extend the existing verified archive flow to find and freshly verify matching content before copying, and retain each source association. S-04 owns full interruption and repeat recovery.
+  do_not_assume:
+    - A stored catalog hash proves the current archive file is intact.
+    - Matching filenames or intended paths prove matching content.
+    - A catalog update and a media file operation form one atomic transaction.
+    - Each catalog record currently represents a distinct media file.
